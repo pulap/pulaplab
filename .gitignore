@@ -1,0 +1,26 @@
+# Editor/IDE settings
+.idea/
+.vscode/
+.calva/
+
+# Clojure build artifacts
+target/
+classes/
+cpcache/
+.cpcache/
+
+# Clojure compiled output
+*.class
+
+# OS files
+.DS_Store
+
+# Leiningen specific (even if not used, por si alguien corre algo)
+.lein-deps-sum
+.lein-repl-history
+.lein-plugins/
+
+# Misc
+*.log
+*.tmp
+
