@@ -1,11 +1,35 @@
 (ns pulaplab.core
-  (:require [pulaplab.handlers.core :as handler]
+  (:require [pulaplab.handlers.core :as handlers]
             [pulaplab.db.core :as db]
             [pulaplab.db.migrations :as migrations]
             [ring.adapter.jetty :as jetty]))
 
-(defn -main []
+(defonce server (atom nil))
+
+(defn app []
+  (require 'pulaplab.handlers.core :reload)
+  handlers/app)
+
+(defn stop-server []
+  (when @server
+    (println "Stopping Pulap HTTP server...")
+    (.stop @server)
+    (reset! server nil)))
+
+(defn start-server []
+  (when @server
+    (stop-server))
   (println "Starting Pulap HTTP server...")
   (println "Testing DB connection:" (db/test-connection))
   (migrations/migrate!)
-  (jetty/run-jetty handler/app {:port 3000 :join? false}))
+  (let [srv (jetty/run-jetty (app) {:port 3000 :join? false})]
+    (reset! server srv)
+    (println "Pulap server running on http://localhost:3000")
+    srv))
+
+(defn restart-server []
+  (stop-server)
+  (start-server))
+
+(defn -main []
+  (start-server))

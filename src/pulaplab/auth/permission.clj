@@ -1,4 +1,4 @@
-(ns pulaplab.auth.permission
+(ns auth.permission
   (:require [pulaplab.model.core :as base]))
 
 (defn new-permission

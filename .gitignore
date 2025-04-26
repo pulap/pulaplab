@@ -24,5 +24,8 @@ cpcache/
 *.log
 *.tmp
 
+.clj-kondo/
 .nrepl-port
+
+# Database
 pulaplab.db

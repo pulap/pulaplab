@@ -1,4 +1,4 @@
-(ns pulaplab.auth.resource
+(ns auth.resource
   (:require [pulaplab.model.core :as base]))
 
 (defn new-resource
