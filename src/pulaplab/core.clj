@@ -8,4 +8,4 @@
   (println "Starting Pulap HTTP server...")
   (println "Testing DB connection:" (db/test-connection))
   (migrations/migrate!)
-  (jetty/run-jetty handler/app {:port 3000 :join? true}))
+  (jetty/run-jetty handler/app {:port 3000 :join? false}))

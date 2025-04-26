@@ -61,8 +61,10 @@
 (defn migrate! []
   (ensure-migrations-table)
   (let [applied (load-applied-migrations)
-        files (list-migration-files)
-        pending (remove applied files)]
-    (doseq [filename pending]
-      (let [migration (parse-migration-file filename)]
-        (apply-migration! migration)))))
+        files (list-migration-files)]
+    (doseq [filename files
+            :let [{:keys [datetime name] :as migration} (parse-migration-file filename)
+                  migration-id (str datetime "-" name)]
+            :when (not (applied migration-id))]
+      (apply-migration! migration))))
+

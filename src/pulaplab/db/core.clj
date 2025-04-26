@@ -8,4 +8,7 @@
 (def datasource (jdbc/get-datasource db-spec))
 
 (defn test-connection []
-  (jdbc/execute! datasource ["SELECT 1"]))
+  (let [result (jdbc/execute! datasource ["SELECT 1"])]
+    (if (= result [{:1 1}])
+      "Database connection successful!"
+      "Database connection failed!")))
