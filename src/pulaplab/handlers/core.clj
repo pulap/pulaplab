@@ -1,6 +1,7 @@
 (ns pulaplab.handlers.core
   (:require [reitit.ring :as ring]
-            [ring.middleware.params :refer [wrap-params]]))
+            [ring.middleware.params :refer [wrap-params]]
+            [pulaplab.handlers.web.auth :as auth-web]))
 
 (defn not-found-handler [_]
   {:status 404
@@ -21,7 +22,8 @@
   [["/admin" {:get (fn [_]
                      {:status 200
                       :headers {"Content-Type" "text/plain"}
-                      :body "Admin dashboard (TODO auth)"})}]])
+                      :body "Admin dashboard (TODO auth)"})}]
+   ["/auth/list-users" {:get auth-web/list-users-handler}]])
 
 (def app
   (ring/ring-handler

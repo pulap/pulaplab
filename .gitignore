@@ -24,3 +24,5 @@ cpcache/
 *.log
 *.tmp
 
+.nrepl-port
+pulaplab.db
