@@ -1,4 +1,4 @@
-(ns pulaplab.auth.user
+(ns auth.user
   (:require [pulaplab.model.core :as base]))
 
 (defn new-user

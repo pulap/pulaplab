@@ -1,7 +1,7 @@
 (ns pulaplab.handlers.core
   (:require [reitit.ring :as ring]
             [ring.middleware.params :refer [wrap-params]]
-            [pulaplab.handlers.web.auth :as auth-web]))
+            [pulaplab.auth.handlers :as auth-web]))
 
 (defn not-found-handler [_]
   {:status 404
@@ -23,7 +23,15 @@
                      {:status 200
                       :headers {"Content-Type" "text/plain"}
                       :body "Admin dashboard (TODO auth)"})}]
-   ["/auth/list-users" {:get auth-web/list-users-handler}]])
+   ["/auth/list-users" {:get auth-web/list-users-handler}]
+   ["/auth/new-user" {:get auth-web/new-user-handler}]
+   ["/auth/create-user" {:post auth-web/create-user-handler}]
+   ["/auth/show-user" {:get auth-web/show-user-handler}]
+   ["/auth/edit-user" {:get auth-web/edit-user-handler}]
+   ["/auth/update-user" {:post auth-web/update-user-handler}]
+   ["/auth/delete-user" {:post auth-web/delete-user-handler}] ;; <-- agregar esta línea
+   ])
+
 
 (def app
   (ring/ring-handler

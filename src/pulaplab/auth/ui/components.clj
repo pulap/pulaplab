@@ -13,7 +13,7 @@
 (defn menu []
   [:nav
    [:ul {:class (styles/classes :nav-list)}
-    [:li [:a {:href "/private/auth/list-users" :class (styles/classes :nav-link)} "Users"]]
-    [:li [:a {:href "/private/auth/list-roles" :class (styles/classes :nav-link)} "Roles"]]
-    [:li [:a {:href "/private/auth/list-permissions" :class (styles/classes :nav-link)} "Permissions"]]
-    [:li [:a {:href "/private/auth/list-resources" :class (styles/classes :nav-link)} "Resources"]]]])
+    [:li [:a {:href "/private/auth/list-users" :class (styles/classes :nav-button)} "Users"]]
+    [:li [:a {:href "/private/auth/list-roles" :class (styles/classes :nav-button)} "Roles"]]
+    [:li [:a {:href "/private/auth/list-permissions" :class (styles/classes :nav-button)} "Permissions"]]
+    [:li [:a {:href "/private/auth/list-resources" :class (styles/classes :nav-button)} "Resources"]]]])
