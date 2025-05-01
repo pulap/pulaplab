@@ -1,16 +1,21 @@
 (ns pulaplab.auth.handlers
-  (:require [pulaplab.auth.ui.pages :as pages]
+  (:require [pulaplab.auth.ui.user :as user-pages]
+            [pulaplab.auth.ui.role :as role-pages]
             [pulaplab.auth.db :as auth-db]))
+
+;; -------------------
+;; User handlers
+;; -------------------
 
 (defn list-users-handler [_request]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (pages/list-users-page (auth-db/list-users) nil)})
+   :body (user-pages/list-users-page (auth-db/list-users) nil)})
 
 (defn new-user-handler [_]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (pages/new-user-page)})
+   :body (user-pages/new-user-page)})
 
 (defn create-user-handler [request]
   (let [{:strs [username email]} (:form-params request)]
@@ -25,7 +30,7 @@
     (if user
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (pages/show-user-page user)}
+       :body (user-pages/show-user-page user)}
       {:status 404
        :headers {"Content-Type" "text/plain"}
        :body "User not found"})))
@@ -36,7 +41,7 @@
     (if user
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (pages/edit-user-page user)}
+       :body (user-pages/edit-user-page user)}
       {:status 404
        :headers {"Content-Type" "text/plain"}
        :body "User not found"})))
@@ -56,3 +61,75 @@
     {:status 302
      :headers {"Location" "/private/auth/list-users"}
      :body ""}))
+
+
+;; -------------------
+;; Role handlers
+;; -------------------
+
+(defn list-roles-handler
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (role-pages/list-roles-page
+             (auth-db/list-roles)
+             nil)})
+
+(defn new-role-handler
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (role-pages/new-role-page)})
+
+(defn create-role-handler
+  [{:keys [form-params]}]
+  (let [{:strs [slug name description]} form-params]
+    (auth-db/create-role! {:slug        slug
+                           :name        name
+                           :description description})
+    {:status  302
+     :headers {"Location" "/private/auth/list-roles"}
+     :body    ""}))
+
+(defn show-role-handler
+  [{:keys [query-params]}]
+  (let [id   (query-params "id")
+        role (auth-db/get-role-by-id id)]
+    (if role
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (role-pages/show-role-page role)}
+      {:status  404
+       :headers {"Content-Type" "text/plain"}
+       :body    "Role not found"})))
+
+(defn edit-role-handler
+  [{:keys [query-params]}]
+  (let [id   (query-params "id")
+        role (auth-db/get-role-by-id id)]
+    (if role
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (role-pages/edit-role-page role)}
+      {:status  404
+       :headers {"Content-Type" "text/plain"}
+       :body    "Role not found"})))
+
+(defn update-role-handler
+  [{:keys [query-params form-params]}]
+  (let [id                  (query-params "id")
+        {:strs [slug name description]} form-params]
+    (auth-db/update-role! id {:slug        slug
+                              :name        name
+                              :description description})
+    {:status  302
+     :headers {"Location" "/private/auth/list-roles"}
+     :body    ""}))
+
+(defn delete-role-handler
+  [{:keys [form-params]}]
+  (when-let [id (form-params "id")]
+    (auth-db/delete-role! id))
+  {:status  302
+   :headers {"Location" "/private/auth/list-roles"}
+   :body    ""})
