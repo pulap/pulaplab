@@ -61,3 +61,52 @@
 (defn delete-user! [id]
   (jdbc/execute! db/datasource
                  ["DELETE FROM users WHERE id = ?" id]))
+
+;; ---------------------------
+;; Roles
+;; ---------------------------
+
+(defn list-roles []
+  (->> (jdbc/execute! db/datasource
+                      ["SELECT id, slug, name, description FROM roles ORDER BY name"]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map (fn [row]
+              {:id          (:id row)
+               :slug        (:slug row)
+               :name        (:name row)
+               :description (:description row)}))))
+
+(defn get-role-by-id [id]
+  (when-let [row (first (jdbc/execute! db/datasource
+                                       ["SELECT id, slug, name, description FROM roles WHERE id = ?" id]
+                                       {:builder-fn rs/as-unqualified-lower-maps}))]
+    {:id          (:id row)
+     :slug        (:slug row)
+     :name        (:name row)
+     :description (:description row)}))
+
+(defn create-role! [{:keys [slug name description]}]
+  (jdbc/execute! db/datasource
+                 ["INSERT INTO roles (id, slug, name, description, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                  (generate-uuid)
+                  slug
+                  name
+                  description]))
+
+(defn update-role! [id {:keys [slug name description]}]
+  (jdbc/execute! db/datasource
+                 ["UPDATE roles
+                   SET slug        = ?
+                     , name        = ?
+                     , description = ?
+                     , updated_at  = CURRENT_TIMESTAMP
+                   WHERE id = ?"
+                  slug
+                  name
+                  description
+                  id]))
+
+(defn delete-role! [id]
+  (jdbc/execute! db/datasource
+                 ["DELETE FROM roles WHERE id = ?" id]))

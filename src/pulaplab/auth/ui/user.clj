@@ -1,4 +1,4 @@
-(ns pulaplab.auth.ui.pages
+(ns pulaplab.auth.ui.user
   (:require
    [pulaplab.ui.layout     :refer [layout]]
    [pulaplab.ui.styles     :as styles]
