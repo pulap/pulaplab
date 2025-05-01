@@ -3,7 +3,7 @@
             [pulaplab.ui.styles :as styles]
             [pulaplab.auth.ui.core :as core]))
 
-(defn list-roles-page
+(defn index
   [roles flash]
   (layout
    {:title          "Role List"
@@ -43,7 +43,7 @@
        "New"]]]
     :footer-content (core/footer)}))
 
-(defn new-role-page
+(defn new
   []
   (layout
    {:title          "New Role"
@@ -77,7 +77,7 @@
                    "Create"]])]]
     :footer-content (core/footer)}))
 
-(defn show-role-page
+(defn show
   [role]
   (layout
    {:title          "Show Role"
@@ -99,7 +99,7 @@
         "Back"]]]]
     :footer-content (core/footer)}))
 
-(defn edit-role-page
+(defn edit
   [role]
   (layout
    {:title          "Edit Role"

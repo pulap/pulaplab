@@ -1,5 +1,6 @@
 (ns pulaplab.handlers.core
   (:require
+   [ring.util.response :refer [redirect]]
    [reitit.ring :as ring]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [pulaplab.auth.handlers          :as auth-web]))
@@ -12,14 +13,18 @@
    :body    "Not found"})
 
 (def public-routes
-  [["/" {:get (fn [_]
-                {:status  200
-                 :headers {"Content-Type" "text/plain"}
-                 :body    "Welcome to Pulap!"})}]
+  [;; NOTE: edirecting to list users for now
+   ;; ["/" {:get (fn [_]
+   ;;               {:status  200
+   ;;                :headers {"Content-Type" "text/plain"}
+   ;;                :body    "Welcome to Pulap!"})}]
+   ["/" {:get (fn [_]
+                (redirect "/private/auth/list-users"))}]
    ["/health" {:get (fn [_]
                       {:status  200
                        :headers {"Content-Type" "text/plain"}
                        :body    "OK"})}]])
+
 
 (def private-routes
   [["/admin" {:get (fn [_]
