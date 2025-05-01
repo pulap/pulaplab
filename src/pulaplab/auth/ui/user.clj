@@ -4,7 +4,7 @@
    [pulaplab.ui.styles     :as styles]
    [pulaplab.auth.ui.core  :as core]))
 
-(defn list-users-page
+(defn index
   [users flash]
   (layout
    {:title          "User List"
@@ -49,7 +49,7 @@
        "New"]]]
     :footer-content (core/footer)}))
 
-(defn new-user-page
+(defn new
   []
   (layout
    {:title          "New User"
@@ -115,7 +115,7 @@
                    "Create"]])]]
     :footer-content (core/footer)}))
 
-(defn show-user-page
+(defn show
   [user]
   (layout
    {:title          "Show User"
@@ -143,7 +143,7 @@
 
 
 
-(defn edit-user-page
+(defn edit
   [user]
   (layout
    {:title          "Edit User"

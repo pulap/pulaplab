@@ -10,12 +10,12 @@
 (defn list-users-handler [_request]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (user-pages/list-users-page (auth-db/list-users) nil)})
+   :body (user-pages/index (auth-db/list-users) nil)})
 
 (defn new-user-handler [_]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (user-pages/new-user-page)})
+   :body (user-pages/new)})
 
 (defn create-user-handler [request]
   (let [{:strs [username email]} (:form-params request)]
@@ -30,7 +30,7 @@
     (if user
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (user-pages/show-user-page user)}
+       :body (user-pages/show user)}
       {:status 404
        :headers {"Content-Type" "text/plain"}
        :body "User not found"})))
@@ -41,7 +41,7 @@
     (if user
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (user-pages/edit-user-page user)}
+       :body (user-pages/edit user)}
       {:status 404
        :headers {"Content-Type" "text/plain"}
        :body "User not found"})))
@@ -71,7 +71,7 @@
   [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
-   :body    (role-pages/list-roles-page
+   :body    (role-pages/index
              (auth-db/list-roles)
              nil)})
 
@@ -79,7 +79,7 @@
   [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
-   :body    (role-pages/new-role-page)})
+   :body    (role-pages/new)})
 
 (defn create-role-handler
   [{:keys [form-params]}]
@@ -98,7 +98,7 @@
     (if role
       {:status  200
        :headers {"Content-Type" "text/html"}
-       :body    (role-pages/show-role-page role)}
+       :body    (role-pages/show role)}
       {:status  404
        :headers {"Content-Type" "text/plain"}
        :body    "Role not found"})))
@@ -110,7 +110,7 @@
     (if role
       {:status  200
        :headers {"Content-Type" "text/html"}
-       :body    (role-pages/edit-role-page role)}
+       :body    (role-pages/edit role)}
       {:status  404
        :headers {"Content-Type" "text/plain"}
        :body    "Role not found"})))
