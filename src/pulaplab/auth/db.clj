@@ -110,3 +110,101 @@
 (defn delete-role! [id]
   (jdbc/execute! db/datasource
                  ["DELETE FROM roles WHERE id = ?" id]))
+
+;; ---------------------------
+;; Permissions
+;; ---------------------------
+
+(defn list-permissions []
+  (->> (jdbc/execute! db/datasource
+                      ["SELECT id, slug, name, description FROM permissions ORDER BY name"]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map (fn [row]
+              {:id          (:id row)
+               :slug        (:slug row)
+               :name        (:name row)
+               :description (:description row)}))))
+
+(defn get-permission-by-id [id]
+  (when-let [row (first (jdbc/execute! db/datasource
+                                       ["SELECT id, slug, name, description FROM permissions WHERE id = ?" id]
+                                       {:builder-fn rs/as-unqualified-lower-maps}))]
+    {:id          (:id row)
+     :slug        (:slug row)
+     :name        (:name row)
+     :description (:description row)}))
+
+(defn create-permission! [{:keys [slug name description]}]
+  (jdbc/execute! db/datasource
+                 ["INSERT INTO permissions (id, slug, name, description, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                  (generate-uuid)
+                  slug
+                  name
+                  description]))
+
+(defn update-permission! [id {:keys [slug name description]}]
+  (jdbc/execute! db/datasource
+                 ["UPDATE permissions
+                   SET slug        = ?
+                     , name        = ?
+                     , description = ?
+                     , updated_at  = CURRENT_TIMESTAMP
+                   WHERE id = ?"
+                  slug
+                  name
+                  description
+                  id]))
+
+(defn delete-permission! [id]
+  (jdbc/execute! db/datasource
+                 ["DELETE FROM permissions WHERE id = ?" id]))
+
+;; ---------------------------
+;; Resounces
+;; ---------------------------
+
+(defn list-resources []
+  (->> (jdbc/execute! db/datasource
+                      ["SELECT id, slug, name, description FROM resources ORDER BY name"]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map (fn [row]
+              {:id          (:id row)
+               :slug        (:slug row)
+               :name        (:name row)
+               :description (:description row)}))))
+
+(defn get-resource-by-id [id]
+  (when-let [row (first (jdbc/execute! db/datasource
+                                       ["SELECT id, slug, name, description FROM resources WHERE id = ?" id]
+                                       {:builder-fn rs/as-unqualified-lower-maps}))]
+    {:id          (:id row)
+     :slug        (:slug row)
+     :name        (:name row)
+     :description (:description row)}))
+
+(defn create-resource! [{:keys [slug name description]}]
+  (jdbc/execute! db/datasource
+                 ["INSERT INTO resources (id, slug, name, description, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                  (generate-uuid)
+                  slug
+                  name
+                  description]))
+
+(defn update-resource! [id {:keys [slug name description]}]
+  (jdbc/execute! db/datasource
+                 ["UPDATE resources
+                   SET slug        = ?
+                     , name        = ?
+                     , description = ?
+                     , updated_at  = CURRENT_TIMESTAMP
+                   WHERE id = ?"
+                  slug
+                  name
+                  description
+                  id]))
+
+(defn delete-resource! [id]
+  (jdbc/execute! db/datasource
+                 ["DELETE FROM resources WHERE id = ?" id]))

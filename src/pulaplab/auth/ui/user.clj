@@ -24,27 +24,22 @@
       [:tbody {:class "bg-white divide-y divide-gray-200"}
        (for [{:keys [id username email]} users]
          [:tr {:key id}
-          [:td {:class (styles/get-class :td-username)}
+          [:td {:class (styles/get-class :td-primary)}
            [:a {:href  (str "/private/auth/show-user?id=" id)
-                :class (styles/get-class :link-username)}
+                :class (styles/get-class :link-primary)}
             username]]
-          [:td {:class (styles/get-class :td-email)} email]
+          [:td {:class (styles/get-class :td-secondary)} email]
           [:td {:class (styles/get-class :td-actions)}
            [:a {:href  (str "/private/auth/show-user?id=" id)
-                :class (styles/get-class :button-show)}
-            "Show"]
+                :class (styles/get-class :button-show)} "Show"]
            [:a {:href  (str "/private/auth/edit-user?id=" id)
-                :class (styles/get-class :button-edit)}
-            "Edit"]
-           (core/form {:action "/private/auth/delete-user"
-                       :method "POST"
-                       :class  "inline"}
-                      [:input  {:type  "hidden" :name "id" :value id}]
-                      [:button {:type  "submit"
-                                :class (styles/get-class :button-delete)}
+                :class (styles/get-class :button-edit)} "Edit"]
+           (core/form {:action "/private/auth/delete-user" :method "POST" :class "inline"}
+                      [:input {:type "hidden" :name "id" :value id}]
+                      [:button {:type  "submit" :class (styles/get-class :button-delete)}
                        "Delete"])]])]]
      [:div {:class "flex justify-center mt-6"}
-      [:a {:href  "/private/auth/new-user"
+      [:a {:href "/private/auth/new-user"
            :class (styles/get-class :button-new)}
        "New"]]]
     :footer-content (core/footer)}))

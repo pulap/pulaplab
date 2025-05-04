@@ -1,6 +1,8 @@
 (ns pulaplab.auth.handlers
   (:require [pulaplab.auth.ui.user :as user-pages]
             [pulaplab.auth.ui.role :as role-pages]
+            [pulaplab.auth.ui.permission :as permission-pages]
+            [pulaplab.auth.ui.resource :as resource-pages]
             [pulaplab.auth.db :as auth-db]))
 
 ;; -------------------
@@ -132,4 +134,146 @@
     (auth-db/delete-role! id))
   {:status  302
    :headers {"Location" "/private/auth/list-roles"}
+   :body    ""})
+
+;; -------------------
+;; Permission handlers
+;; -------------------
+
+(defn list-permissions-handler
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (permission-pages/index
+             (auth-db/list-permissions)
+             nil)})
+
+(defn new-permission-handler
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (permission-pages/new)})
+
+(defn create-permission-handler
+  [{:keys [form-params]}]
+  (let [{:strs [slug name description]} form-params]
+    (auth-db/create-permission! {:slug        slug
+                           :name        name
+                           :description description})
+    {:status  302
+     :headers {"Location" "/private/auth/list-permissions"}
+     :body    ""}))
+
+(defn show-permission-handler
+  [{:keys [query-params]}]
+  (let [id   (query-params "id")
+        permission (auth-db/get-permission-by-id id)]
+    (if permission
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (permission-pages/show permission)}
+      {:status  404
+       :headers {"Content-Type" "text/plain"}
+       :body    "Permission not found"})))
+
+(defn edit-permission-handler
+  [{:keys [query-params]}]
+  (let [id   (query-params "id")
+        permission (auth-db/get-permission-by-id id)]
+    (if permission
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (permission-pages/edit permission)}
+      {:status  404
+       :headers {"Content-Type" "text/plain"}
+       :body    "Permission not found"})))
+
+(defn update-permission-handler
+  [{:keys [query-params form-params]}]
+  (let [id                  (query-params "id")
+        {:strs [slug name description]} form-params]
+    (auth-db/update-permission! id {:slug        slug
+                              :name        name
+                              :description description})
+    {:status  302
+     :headers {"Location" "/private/auth/list-permissions"}
+     :body    ""}))
+
+(defn delete-permission-handler
+  [{:keys [form-params]}]
+  (when-let [id (form-params "id")]
+    (auth-db/delete-permission! id))
+  {:status  302
+   :headers {"Location" "/private/auth/list-permissions"}
+   :body    ""})
+
+;; -------------------
+;; Resource handlers
+;; -------------------
+
+(defn list-resources-handler
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (resource-pages/index
+             (auth-db/list-resources)
+             nil)})
+
+(defn new-resource-handler
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (resource-pages/new)})
+
+(defn create-resource-handler
+  [{:keys [form-params]}]
+  (let [{:strs [slug name description]} form-params]
+    (auth-db/create-resource! {:slug        slug
+                           :name        name
+                           :description description})
+    {:status  302
+     :headers {"Location" "/private/auth/list-resources"}
+     :body    ""}))
+
+(defn show-resource-handler
+  [{:keys [query-params]}]
+  (let [id   (query-params "id")
+        resource (auth-db/get-resource-by-id id)]
+    (if resource
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (resource-pages/show resource)}
+      {:status  404
+       :headers {"Content-Type" "text/plain"}
+       :body    "Resource not found"})))
+
+(defn edit-resource-handler
+  [{:keys [query-params]}]
+  (let [id   (query-params "id")
+        resource (auth-db/get-resource-by-id id)]
+    (if resource
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (resource-pages/edit resource)}
+      {:status  404
+       :headers {"Content-Type" "text/plain"}
+       :body    "Resource not found"})))
+
+(defn update-resource-handler
+  [{:keys [query-params form-params]}]
+  (let [id                  (query-params "id")
+        {:strs [slug name description]} form-params]
+    (auth-db/update-resource! id {:slug        slug
+                              :name        name
+                              :description description})
+    {:status  302
+     :headers {"Location" "/private/auth/list-resources"}
+     :body    ""}))
+
+(defn delete-resource-handler
+  [{:keys [form-params]}]
+  (when-let [id (form-params "id")]
+    (auth-db/delete-resource! id))
+  {:status  302
+   :headers {"Location" "/private/auth/list-resources"}
    :body    ""})
