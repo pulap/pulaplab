@@ -25,13 +25,12 @@
                        :headers {"Content-Type" "text/plain"}
                        :body    "OK"})}]])
 
-
 (def private-routes
   [["/admin" {:get (fn [_]
                      {:status  200
                       :headers {"Content-Type" "text/plain"}
                       :body    "Admin dashboard (TODO auth)"})}]
-   ;; User
+   ;; Users
    ["/auth/list-users"   {:get  auth-web/list-users-handler}]
    ["/auth/new-user"     {:get  auth-web/new-user-handler}]
    ["/auth/create-user"  {:post auth-web/create-user-handler}]
@@ -39,14 +38,30 @@
    ["/auth/edit-user"    {:get  auth-web/edit-user-handler}]
    ["/auth/update-user"  {:post auth-web/update-user-handler}]
    ["/auth/delete-user"  {:post auth-web/delete-user-handler}]
-   ;; Role
+   ;; Roles
    ["/auth/list-roles"   {:get  auth-web/list-roles-handler}]
    ["/auth/new-role"     {:get  auth-web/new-role-handler}]
    ["/auth/create-role"  {:post auth-web/create-role-handler}]
    ["/auth/show-role"    {:get  auth-web/show-role-handler}]
    ["/auth/edit-role"    {:get  auth-web/edit-role-handler}]
    ["/auth/update-role"  {:post auth-web/update-role-handler}]
-   ["/auth/delete-role"  {:post auth-web/delete-role-handler}]])
+   ["/auth/delete-role"  {:post auth-web/delete-role-handler}]
+   ;; Permissions
+   ["/auth/list-permissions"   {:get  auth-web/list-permissions-handler}]
+   ["/auth/new-permission"     {:get  auth-web/new-permission-handler}]
+   ["/auth/create-permission"  {:post auth-web/create-permission-handler}]
+   ["/auth/show-permission"    {:get  auth-web/show-permission-handler}]
+   ["/auth/edit-permission"    {:get  auth-web/edit-permission-handler}]
+   ["/auth/update-permission"  {:post auth-web/update-permission-handler}]
+   ["/auth/delete-permission"  {:post auth-web/delete-permission-handler}]
+   ;; Resources
+   ["/auth/list-resources"   {:get  auth-web/list-resources-handler}]
+   ["/auth/new-resource"     {:get  auth-web/new-resource-handler}]
+   ["/auth/create-resource"  {:post auth-web/create-resource-handler}]
+   ["/auth/show-resource"    {:get  auth-web/show-resource-handler}]
+   ["/auth/edit-resource"    {:get  auth-web/edit-resource-handler}]
+   ["/auth/update-resource"  {:post auth-web/update-resource-handler}]
+   ["/auth/delete-resource"  {:post auth-web/delete-resource-handler}]])
 
 (def app
   (-> (ring/ring-handler

@@ -33,3 +33,6 @@
 
 (defn -main []
   (start-server))
+
+;; (stop-server)
+;; (start-server)
