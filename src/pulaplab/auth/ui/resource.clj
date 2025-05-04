@@ -19,7 +19,7 @@
        [:tr
         [:th {:class (styles/get-class :th)} "Name"]
         [:th {:class (styles/get-class :th)} "Description"]
-        [:th {:class (styles/get-class :th)} "Actions"]]]
+        [:th {:class (styles/get-class :th-actions)} "Actions"]]]
       [:tbody {:class "bg-white divide-y divide-gray-200"}
        (for [{:keys [id name slug]} resources]
          [:tr {:key id}

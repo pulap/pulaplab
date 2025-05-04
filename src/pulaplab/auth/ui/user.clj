@@ -20,7 +20,7 @@
        [:tr
         [:th {:class (styles/get-class :th)} "Username"]
         [:th {:class (styles/get-class :th)} "Email"]
-        [:th {:class (styles/get-class :th)} "Actions"]]]
+        [:th {:class (styles/get-class :th-actions)} "Actions"]]]
       [:tbody {:class "bg-white divide-y divide-gray-200"}
        (for [{:keys [id username email]} users]
          [:tr {:key id}
