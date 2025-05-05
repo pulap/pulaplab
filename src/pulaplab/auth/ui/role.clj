@@ -1,7 +1,9 @@
 (ns pulaplab.auth.ui.role
   (:require [pulaplab.ui.layout :refer [layout]]
             [pulaplab.ui.styles :as styles]
-            [pulaplab.auth.ui.core :as core]))
+            [pulaplab.auth.ui.core :as core]
+            [pulaplab.auth.ui.core :as auth-core]
+            [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 (defn index
   [roles flash]
@@ -131,4 +133,50 @@
                   [:button {:type  "submit"
                             :class (styles/get-class :button-new)}
                    "Update"]])]]
+    :footer-content (core/footer)}))
+
+(defn list-user-roles
+  [user-id roles]
+  (layout
+   {:title          "Roles Management for User"
+    :header-content (core/header)
+    :main-content
+    [:div {:class "space-y-8"}
+     [:h1 {:class "text-2xl font-bold mb-4"} "Roles Management for User"]
+
+     ;; Table for assigned roles
+     [:h2 {:class "text-xl font-bold mb-2"} "Assigned Roles"]
+     [:table {:class (styles/get-class :table)}
+      [:thead {:class (styles/get-class :thead)}
+       [:tr
+        [:th {:class (styles/get-class :th)} "Name"]
+        [:th {:class (styles/get-class :th)} "Description"]
+        [:th {:class (styles/get-class :th-actions)} "Action"]]]
+      [:tbody {:class "bg-white divide-y divide-gray-200"}
+       (for [role (filter #(= 1 (:is_assigned %)) roles)]
+         [:tr {:key (:role_id role)}
+          [:td {:class (styles/get-class :td-primary)} (:role_name role)]
+          [:td {:class (styles/get-class :td-secondary)} (:role_description role)]
+          [:td {:class (styles/get-class :td-actions)}
+           [:a {:href (str "/unassign-role/" user-id "/" (:role_id role))
+                :class (styles/get-class :button-delete)} "Unassign"]]])]]
+
+     ;; Table for unassigned roles
+     [:h2 {:class "text-xl font-bold mb-2"} "Unassigned Roles"]
+     [:table {:class (styles/get-class :table)}
+      [:thead {:class (styles/get-class :thead)}
+       [:tr
+        [:th {:class (styles/get-class :th)} "Name"]
+        [:th {:class (styles/get-class :th)} "Description"]
+        [:th {:class (styles/get-class :th-actions)} "Action"]]]
+      [:tbody {:class "bg-white divide-y divide-gray-200"}
+       (for [role (filter #(= 0 (:is_assigned %)) roles)]
+         [:tr {:key (:role_id role)}
+          [:td {:class (styles/get-class :td-primary)} (:role_name role)]
+          [:td {:class (styles/get-class :td-secondary)} (:role_description role)]
+          [:td {:class (styles/get-class :td-actions)}
+           (core/form {:action "/private/auth/assign-role-to-user" :method "POST" :class "inline"}
+                      [:input {:type "hidden" :name "user-id" :value user-id}]
+                      [:input {:type "hidden" :name "role-id" :value (:role_id role)}]
+                      [:button {:type "submit" :class (styles/get-class :button-new)} "Assign"])]])]]]
     :footer-content (core/footer)}))

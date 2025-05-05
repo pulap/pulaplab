@@ -161,7 +161,7 @@
                  ["DELETE FROM permissions WHERE id = ?" id]))
 
 ;; ---------------------------
-;; Resounces
+;; Resources
 ;; ---------------------------
 
 (defn list-resources []
@@ -208,3 +208,30 @@
 (defn delete-resource! [id]
   (jdbc/execute! db/datasource
                  ["DELETE FROM resources WHERE id = ?" id]))
+
+
+;; ---------------------------
+;; Relationships
+;; ---------------------------
+
+(defn get-roles-with-assignment-status [user-id]
+  (jdbc/execute! db/datasource
+                 ["SELECT
+                     r.id AS role_id,
+                     r.slug AS role_slug,
+                     r.name AS role_name,
+                     r.description AS role_description,
+                     CASE
+                         WHEN ur.role_id IS NOT NULL THEN 1
+                         ELSE 0
+                     END AS is_assigned
+                   FROM roles r
+                   LEFT JOIN user_roles ur ON r.id = ur.role_id AND ur.user_id = ?" user-id]
+                 {:builder-fn rs/as-unqualified-lower-maps}))
+
+(defn assign-role-to-user! [user-id role-id]
+  (jdbc/execute! db/datasource
+                 ["INSERT INTO user_roles (user_id, role_id, created_at, updated_at)
+                   VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                  user-id
+                  role-id]))

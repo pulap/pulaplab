@@ -158,8 +158,8 @@
   [{:keys [form-params]}]
   (let [{:strs [slug name description]} form-params]
     (auth-db/create-permission! {:slug        slug
-                           :name        name
-                           :description description})
+                                 :name        name
+                                 :description description})
     {:status  302
      :headers {"Location" "/private/auth/list-permissions"}
      :body    ""}))
@@ -193,8 +193,8 @@
   (let [id                  (query-params "id")
         {:strs [slug name description]} form-params]
     (auth-db/update-permission! id {:slug        slug
-                              :name        name
-                              :description description})
+                                    :name        name
+                                    :description description})
     {:status  302
      :headers {"Location" "/private/auth/list-permissions"}
      :body    ""}))
@@ -229,8 +229,8 @@
   [{:keys [form-params]}]
   (let [{:strs [slug name description]} form-params]
     (auth-db/create-resource! {:slug        slug
-                           :name        name
-                           :description description})
+                               :name        name
+                               :description description})
     {:status  302
      :headers {"Location" "/private/auth/list-resources"}
      :body    ""}))
@@ -264,8 +264,8 @@
   (let [id                  (query-params "id")
         {:strs [slug name description]} form-params]
     (auth-db/update-resource! id {:slug        slug
-                              :name        name
-                              :description description})
+                                  :name        name
+                                  :description description})
     {:status  302
      :headers {"Location" "/private/auth/list-resources"}
      :body    ""}))
@@ -277,3 +277,22 @@
   {:status  302
    :headers {"Location" "/private/auth/list-resources"}
    :body    ""})
+
+
+;; -------------------
+;; Relationships handlers
+;; -------------------
+
+(defn list-user-roles-handler [request]
+  (let [user-id (get-in request [:query-params "id"])
+        roles (auth-db/get-roles-with-assignment-status user-id)]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (hiccup.page/html5 (role-pages/list-user-roles user-id roles))}))
+
+(defn assign-role-handler [request]
+  (let [{:strs [user-id role-id]} (:form-params request)]
+    (auth-db/assign-role-to-user! user-id role-id)
+    {:status 302
+     :headers {"Location" (str "/private/auth/list-user-roles?id=" user-id)}
+     :body ""}))

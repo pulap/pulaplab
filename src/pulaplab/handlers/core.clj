@@ -61,7 +61,11 @@
    ["/auth/show-resource"    {:get  auth-web/show-resource-handler}]
    ["/auth/edit-resource"    {:get  auth-web/edit-resource-handler}]
    ["/auth/update-resource"  {:post auth-web/update-resource-handler}]
-   ["/auth/delete-resource"  {:post auth-web/delete-resource-handler}]])
+   ["/auth/delete-resource"  {:post auth-web/delete-resource-handler}]
+   ;; User roles
+   ["/auth/list-user-roles" {:get auth-web/list-user-roles-handler}]
+   ["/auth/assign-role-to-user" {:post auth-web/assign-role-handler}]])
+
 
 (def app
   (-> (ring/ring-handler
