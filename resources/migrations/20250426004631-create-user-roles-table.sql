@@ -3,6 +3,10 @@
 CREATE TABLE user_roles (
     user_id TEXT,
     role_id TEXT,
+    created_by TEXT,
+    updated_by TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
     PRIMARY KEY (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
