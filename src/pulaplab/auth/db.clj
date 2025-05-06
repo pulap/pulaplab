@@ -1,7 +1,7 @@
 (ns pulaplab.auth.db
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
-            [pulaplab.db.core :as db]
+            [pulaplab.db.core :as db :refer [db-spec]]
             [clojure.string :as str])
   (:import (java.util UUID)))
 
@@ -235,3 +235,8 @@
                    VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
                   user-id
                   role-id]))
+
+(defn unassign-role-from-user!
+  [user-id role-id]
+  (jdbc/execute! db-spec
+                 ["DELETE FROM user_roles WHERE user_id = ? AND role_id = ?" user-id role-id]))

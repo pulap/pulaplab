@@ -64,7 +64,8 @@
    ["/auth/delete-resource"  {:post auth-web/delete-resource-handler}]
    ;; User roles
    ["/auth/list-user-roles" {:get auth-web/list-user-roles-handler}]
-   ["/auth/assign-role-to-user" {:post auth-web/assign-role-handler}]])
+   ["/auth/assign-role-to-user" {:post auth-web/assign-role-handler}]
+   ["/auth/unassign-role-from-user" {:post auth-web/unassign-role-handler}]])
 
 
 (def app
