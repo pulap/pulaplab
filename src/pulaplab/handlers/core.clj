@@ -65,7 +65,11 @@
    ;; User roles
    ["/auth/list-user-roles" {:get auth-web/list-user-roles-handler}]
    ["/auth/assign-role-to-user" {:post auth-web/assign-role-handler}]
-   ["/auth/unassign-role-from-user" {:post auth-web/unassign-role-handler}]])
+   ["/auth/unassign-role-from-user" {:post auth-web/unassign-role-handler}]
+   ;; User permissions
+   ["/auth/list-user-permissions" {:get auth-web/list-user-permissions-handler}]
+   ["/auth/assign-permission-to-user" {:post auth-web/assign-permission-handler}]
+   ["/auth/unassign-permission-from-user" {:post auth-web/unassign-permission-handler}]])
 
 
 (def app

@@ -303,3 +303,24 @@
     {:status 302
      :headers {"Location" (str "/private/auth/list-user-roles?id=" user-id)}
      :body ""}))
+
+(defn list-user-permissions-handler [request]
+  (let [user-id (get-in request [:query-params "id"])
+        permissions (auth-db/get-permissions-with-assignment-status user-id)]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (hiccup.page/html5 (permission-pages/list-user-permissions user-id permissions))}))
+
+(defn assign-permission-handler [request]
+  (let [{:strs [user-id permission-id]} (:form-params request)]
+    (auth-db/assign-permission-to-user! user-id permission-id)
+    {:status 302
+     :headers {"Location" (str "/private/auth/list-user-permissions?id=" user-id)}
+     :body ""}))
+
+(defn unassign-permission-handler [request]
+  (let [{:strs [user-id permission-id]} (:form-params request)]
+    (auth-db/unassign-permission-from-user! user-id permission-id)
+    {:status 302
+     :headers {"Location" (str "/private/auth/list-user-permissions?id=" user-id)}
+     :body ""}))

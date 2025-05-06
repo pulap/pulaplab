@@ -139,8 +139,11 @@
             :class (styles/get-class :cancel-button)}
         "Back"]
        [:a {:href  (str "/private/auth/list-user-roles?id=" (:id user))
-            :class (styles/get-class :button-edit)}
-        "Roles"]]]]
+            :class (styles/get-class :button-new)}
+        "Roles"]
+       [:a {:href  (str "/private/auth/list-user-permissions?id=" (:id user))
+            :class (styles/get-class :button-new)}
+        "Permissions"]]]]
     :footer-content (core/footer)}))
 
 

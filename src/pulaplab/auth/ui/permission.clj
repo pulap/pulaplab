@@ -132,3 +132,53 @@
                             :class (styles/get-class :button-new)}
                    "Update"]])]]
     :footer-content (core/footer)}))
+
+(defn list-user-permissions
+  [user-id permissions]
+  (println "Debug: Permissions map" permissions) ;; Debugging permissions map
+  (layout
+   {:title          "Permissions Management for User"
+    :header-content (core/header)
+    :main-content
+    [:div {:class "space-y-8"}
+     [:h1 {:class "text-2xl font-bold mb-4"} "Permissions Management for User"]
+
+     ;; Table for assigned permissions
+     [:h2 {:class "text-xl font-bold mb-2"} "Assigned Permissions"]
+     [:table {:class (styles/get-class :table)}
+      [:thead {:class (styles/get-class :thead)}
+       [:tr
+        [:th {:class (styles/get-class :th)} "Name"]
+        [:th {:class (styles/get-class :th)} "Source"]
+        [:th {:class (styles/get-class :th-actions)} "Action"]]]
+      [:tbody {:class "bg-white divide-y divide-gray-200"}
+       (for [permission (filter #(and (not= "Unassigned" (:source %)) (:source %)) permissions)]
+         [:tr {:key (:permission_id permission)
+               :class (when (not= "Direct" (:source permission)) "shadow-sm")}
+          [:td {:class (styles/get-class :td-primary)} (:permission_name permission)]
+          [:td {:class (styles/get-class :td-secondary)} (:source permission)]
+          [:td {:class (styles/get-class :td-actions)}
+           (core/form {:action "/private/auth/unassign-permission-from-user" :method "POST" :class "inline"}
+                      [:input {:type "hidden" :name "user-id" :value user-id}]
+                      [:input {:type "hidden" :name "permission-id" :value (:permission_id permission)}]
+                      [:button {:type "submit" :class (styles/get-class :button-delete)} "Unassign"])]])]]
+
+     ;; Table for unassigned permissions
+     [:h2 {:class "text-xl font-bold mb-2"} "Unassigned Permissions"]
+     [:table {:class (styles/get-class :table)}
+      [:thead {:class (styles/get-class :thead)}
+       [:tr
+        [:th {:class (styles/get-class :th)} "Name"]
+        [:th {:class (styles/get-class :th)} "Source"] ;; Added to align columns
+        [:th {:class (styles/get-class :th-actions)} "Action"]]]
+      [:tbody {:class "bg-white divide-y divide-gray-200"}
+       (for [permission (filter #(= "Unassigned" (:source %)) permissions)]
+         [:tr {:key (:permission_id permission)}
+          [:td {:class (styles/get-class :td-primary)} (:permission_name permission)]
+          [:td {:class (styles/get-class :td-secondary)} ""] ;; Empty cell for alignment
+          [:td {:class (styles/get-class :td-actions)}
+           (core/form {:action "/private/auth/assign-permission-to-user" :method "POST" :class "inline"}
+                      [:input {:type "hidden" :name "user-id" :value user-id}]
+                      [:input {:type "hidden" :name "permission-id" :value (:permission_id permission)}]
+                      [:button {:type "submit" :class (styles/get-class :button-new)} "Assign"])]])]]]
+    :footer-content (core/footer)}))
