@@ -1,5 +1,6 @@
 (ns pulaplab.auth.service
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [pulaplab.auth.db :as auth-db]))
 
 ;; Relaciones in-memory (por ahora)
 (def user-roles (atom {}))          ;; {user-id #{role-id}}
@@ -17,7 +18,10 @@
   (swap! role-permissions update role-id (fnil conj #{}) permission-id))
 
 (defn assign-permission-to-resource! [resource-id permission-id]
-  (swap! resource-permissions update resource-id (fnil conj #{}) permission-id))
+  (auth-db/assign-permission-to-resource! resource-id permission-id))
+
+(defn unassign-permission-from-resource! [resource-id permission-id]
+  (auth-db/unassign-permission-from-resource! resource-id permission-id))
 
 (defn get-user-effective-permissions [user-id]
   (let [roles (get @user-roles user-id #{})

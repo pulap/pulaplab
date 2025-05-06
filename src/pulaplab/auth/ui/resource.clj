@@ -93,10 +93,13 @@
        [:div
         [:label {:class (styles/get-class :form-label)} "Description"]
         [:p {:class "mt-1 text-gray-900"} (:description resource)]]]
-      [:div {:class "flex justify-center mt-6"}
+      [:div {:class "flex justify-center mt-6 space-x-4"}
        [:a {:href  "/private/auth/list-resources"
             :class (styles/get-class :cancel-button)}
-        "Back"]]]]
+        "Back"]
+       [:a {:href  (str "/private/auth/list-resource-permissions?id=" (:id resource))
+            :class (styles/get-class :button-new)}
+        "Permissions"]]]]
     :footer-content (core/footer)}))
 
 (defn edit
