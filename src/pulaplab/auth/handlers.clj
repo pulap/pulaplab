@@ -11,24 +11,24 @@
 ;; User handlers
 ;; -------------------
 
-(defn list-users-handler [_request]
+(defn list-users [_request]
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body (user-pages/index (auth-db/list-users) nil)})
 
-(defn new-user-handler [_]
+(defn new-user [_]
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body (user-pages/new)})
 
-(defn create-user-handler [request]
+(defn create-user [request]
   (let [{:strs [username email]} (:form-params request)]
     (auth-db/create-user! {:username username :email email})
     {:status 302
      :headers {"Location" "/private/auth/list-users"}
      :body ""}))
 
-(defn show-user-handler [request]
+(defn show-user [request]
   (let [id (get-in request [:query-params "id"])
         user (auth-db/get-user-by-id id)]
     (if user
@@ -39,7 +39,7 @@
        :headers {"Content-Type" "text/plain"}
        :body "User not found"})))
 
-(defn edit-user-handler [request]
+(defn edit-user [request]
   (let [id (get-in request [:query-params "id"])
         user (auth-db/get-user-by-id id)]
     (if user
@@ -50,7 +50,7 @@
        :headers {"Content-Type" "text/plain"}
        :body "User not found"})))
 
-(defn update-user-handler [request]
+(defn update-user [request]
   (let [id (get-in request [:query-params "id"])
         {:strs [username email]} (:form-params request)]
     (auth-db/update-user! id {:username username :email email})
@@ -58,7 +58,7 @@
      :headers {"Location" "/private/auth/list-users"}
      :body ""}))
 
-(defn delete-user-handler [request]
+(defn delete-user [request]
   (let [id (get-in request [:form-params "id"])]
     (when id
       (auth-db/delete-user! id))
@@ -71,22 +71,19 @@
 ;; Role handlers
 ;; -------------------
 
-(defn list-roles-handler
-  [_]
+(defn list-roles [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (role-pages/index
              (auth-db/list-roles)
              nil)})
 
-(defn new-role-handler
-  [_]
+(defn new-role [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (role-pages/new)})
 
-(defn create-role-handler
-  [{:keys [form-params]}]
+(defn create-role [{:keys [form-params]}]
   (let [{:strs [slug name description]} form-params]
     (auth-db/create-role! {:slug        slug
                            :name        name
@@ -95,8 +92,7 @@
      :headers {"Location" "/private/auth/list-roles"}
      :body    ""}))
 
-(defn show-role-handler
-  [{:keys [query-params]}]
+(defn show-role [{:keys [query-params]}]
   (let [id   (query-params "id")
         role (auth-db/get-role-by-id id)]
     (if role
@@ -107,8 +103,7 @@
        :headers {"Content-Type" "text/plain"}
        :body    "Role not found"})))
 
-(defn edit-role-handler
-  [{:keys [query-params]}]
+(defn edit-role [{:keys [query-params]}]
   (let [id   (query-params "id")
         role (auth-db/get-role-by-id id)]
     (if role
@@ -119,8 +114,7 @@
        :headers {"Content-Type" "text/plain"}
        :body    "Role not found"})))
 
-(defn update-role-handler
-  [{:keys [query-params form-params]}]
+(defn update-role [{:keys [query-params form-params]}]
   (let [id                  (query-params "id")
         {:strs [slug name description]} form-params]
     (auth-db/update-role! id {:slug        slug
@@ -130,8 +124,7 @@
      :headers {"Location" "/private/auth/list-roles"}
      :body    ""}))
 
-(defn delete-role-handler
-  [{:keys [form-params]}]
+(defn delete-role [{:keys [form-params]}]
   (when-let [id (form-params "id")]
     (auth-db/delete-role! id))
   {:status  302
@@ -142,22 +135,19 @@
 ;; Permission handlers
 ;; -------------------
 
-(defn list-permissions-handler
-  [_]
+(defn list-permissions [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (permission-pages/index
              (auth-db/list-permissions)
              nil)})
 
-(defn new-permission-handler
-  [_]
+(defn new-permission [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (permission-pages/new)})
 
-(defn create-permission-handler
-  [{:keys [form-params]}]
+(defn create-permission [{:keys [form-params]}]
   (let [{:strs [slug name description]} form-params]
     (auth-db/create-permission! {:slug        slug
                                  :name        name
@@ -166,8 +156,7 @@
      :headers {"Location" "/private/auth/list-permissions"}
      :body    ""}))
 
-(defn show-permission-handler
-  [{:keys [query-params]}]
+(defn show-permission [{:keys [query-params]}]
   (let [id   (query-params "id")
         permission (auth-db/get-permission-by-id id)]
     (if permission
@@ -178,8 +167,7 @@
        :headers {"Content-Type" "text/plain"}
        :body    "Permission not found"})))
 
-(defn edit-permission-handler
-  [{:keys [query-params]}]
+(defn edit-permission [{:keys [query-params]}]
   (let [id   (query-params "id")
         permission (auth-db/get-permission-by-id id)]
     (if permission
@@ -190,8 +178,7 @@
        :headers {"Content-Type" "text/plain"}
        :body    "Permission not found"})))
 
-(defn update-permission-handler
-  [{:keys [query-params form-params]}]
+(defn update-permission [{:keys [query-params form-params]}]
   (let [id                  (query-params "id")
         {:strs [slug name description]} form-params]
     (auth-db/update-permission! id {:slug        slug
@@ -201,8 +188,7 @@
      :headers {"Location" "/private/auth/list-permissions"}
      :body    ""}))
 
-(defn delete-permission-handler
-  [{:keys [form-params]}]
+(defn delete-permission [{:keys [form-params]}]
   (when-let [id (form-params "id")]
     (auth-db/delete-permission! id))
   {:status  302
@@ -213,22 +199,19 @@
 ;; Resource handlers
 ;; -------------------
 
-(defn list-resources-handler
-  [_]
+(defn list-resources [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (resource-pages/index
              (auth-db/list-resources)
              nil)})
 
-(defn new-resource-handler
-  [_]
+(defn new-resource [_]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (resource-pages/new)})
 
-(defn create-resource-handler
-  [{:keys [form-params]}]
+(defn create-resource [{:keys [form-params]}]
   (let [{:strs [slug name description]} form-params]
     (auth-db/create-resource! {:slug        slug
                                :name        name
@@ -237,8 +220,7 @@
      :headers {"Location" "/private/auth/list-resources"}
      :body    ""}))
 
-(defn show-resource-handler
-  [{:keys [query-params]}]
+(defn show-resource [{:keys [query-params]}]
   (let [id   (query-params "id")
         resource (auth-db/get-resource-by-id id)]
     (if resource
@@ -249,8 +231,7 @@
        :headers {"Content-Type" "text/plain"}
        :body    "Resource not found"})))
 
-(defn edit-resource-handler
-  [{:keys [query-params]}]
+(defn edit-resource [{:keys [query-params]}]
   (let [id   (query-params "id")
         resource (auth-db/get-resource-by-id id)]
     (if resource
@@ -261,8 +242,7 @@
        :headers {"Content-Type" "text/plain"}
        :body    "Resource not found"})))
 
-(defn update-resource-handler
-  [{:keys [query-params form-params]}]
+(defn update-resource [{:keys [query-params form-params]}]
   (let [id                  (query-params "id")
         {:strs [slug name description]} form-params]
     (auth-db/update-resource! id {:slug        slug
@@ -272,8 +252,7 @@
      :headers {"Location" "/private/auth/list-resources"}
      :body    ""}))
 
-(defn delete-resource-handler
-  [{:keys [form-params]}]
+(defn delete-resource [{:keys [form-params]}]
   (when-let [id (form-params "id")]
     (auth-db/delete-resource! id))
   {:status  302
@@ -285,84 +264,84 @@
 ;; Relationships handlers
 ;; -------------------
 
-(defn list-user-roles-handler [request]
+(defn list-user-roles [request]
   (let [user-id (get-in request [:query-params "id"])
         roles (auth-db/get-roles-with-assignment-status user-id)]
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body (hiccup.page/html5 (role-pages/list-user-roles user-id roles))}))
 
-(defn assign-role-handler [request]
+(defn assign-role [request]
   (let [{:strs [user-id role-id]} (:form-params request)]
     (auth-db/assign-role-to-user! user-id role-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-user-roles?id=" user-id)}
      :body ""}))
 
-(defn unassign-role-handler [request]
+(defn unassign-role [request]
   (let [{:strs [user-id role-id]} (:form-params request)]
     (auth-db/unassign-role-from-user! user-id role-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-user-roles?id=" user-id)}
      :body ""}))
 
-(defn list-user-permissions-handler [request]
+(defn list-user-permissions [request]
   (let [user-id (get-in request [:query-params "id"])
         permissions (auth-db/get-permissions-with-assignment-status user-id)]
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body (hiccup.page/html5 (permission-pages/list-user-permissions user-id permissions))}))
 
-(defn assign-permission-handler [request]
+(defn assign-permission [request]
   (let [{:strs [user-id permission-id]} (:form-params request)]
     (auth-db/assign-permission-to-user! user-id permission-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-user-permissions?id=" user-id)}
      :body ""}))
 
-(defn unassign-permission-handler [request]
+(defn unassign-permission [request]
   (let [{:strs [user-id permission-id]} (:form-params request)]
     (auth-db/unassign-permission-from-user! user-id permission-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-user-permissions?id=" user-id)}
      :body ""}))
 
-(defn list-role-permissions-handler [request]
+(defn list-role-permissions [request]
   (let [role-id (get-in request [:query-params "id"])
         permissions (auth-db/get-permissions-with-assignment-status-for-role role-id)]
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body (hiccup.page/html5 (permission-pages/list-role-permissions role-id permissions))}))
 
-(defn assign-permission-to-role-handler [request]
+(defn assign-permission-to-role [request]
   (let [{:strs [role-id permission-id]} (:form-params request)]
     (auth-db/assign-permission-to-role! role-id permission-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-role-permissions?id=" role-id)}
      :body ""}))
 
-(defn unassign-permission-from-role-handler [request]
+(defn unassign-permission-from-role [request]
   (let [{:strs [role-id permission-id]} (:form-params request)]
     (auth-db/unassign-permission-from-role! role-id permission-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-role-permissions?id=" role-id)}
      :body ""}))
 
-(defn list-resource-permissions-handler [request]
+(defn list-resource-permissions [request]
   (let [resource-id (get-in request [:query-params "id"])
         permissions (auth-db/get-permissions-with-assignment-status-for-resource resource-id)]
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body (hiccup.page/html5 (permission-pages/list-resource-permissions resource-id permissions))}))
 
-(defn assign-permission-to-resource-handler [request]
+(defn assign-permission-to-resource [request]
   (let [{:keys [resource-id permission-id]} (:params request)]
     (auth-service/assign-permission-to-resource! resource-id permission-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-resource-permissions?id=" resource-id)}
      :body ""}))
 
-(defn unassign-permission-from-resource-handler [request]
+(defn unassign-permission-from-resource [request]
   (let [{:keys [resource-id permission-id]} (:params request)]
     (auth-service/unassign-permission-from-resource! resource-id permission-id)
     {:status 302
