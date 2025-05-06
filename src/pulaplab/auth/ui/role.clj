@@ -95,10 +95,13 @@
        [:div
         [:label {:class (styles/get-class :form-label)} "Description"]
         [:p {:class "mt-1 text-gray-900"} (:description role)]]]
-      [:div {:class "flex justify-center mt-6"}
+      [:div {:class "flex justify-center mt-6 space-x-4"}
        [:a {:href  "/private/auth/list-roles"
             :class (styles/get-class :cancel-button)}
-        "Back"]]]]
+        "Back"]
+       [:a {:href  (str "/private/auth/list-role-permissions?id=" (:id role))
+            :class (styles/get-class :button-new)}
+        "Permissions"]]]]
     :footer-content (core/footer)}))
 
 (defn edit

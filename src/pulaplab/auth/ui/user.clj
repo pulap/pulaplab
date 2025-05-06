@@ -120,20 +120,16 @@
      [:div {:class "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"}
       [:h1 {:class "text-2xl font-bold mb-6 text-center"} "User Details"]
       [:div {:class "space-y-4"}
-       ;; Username
        [:div
         [:label {:class (styles/get-class :form-label)} "Username"]
         [:p   {:class "mt-1 text-gray-900"} (:username user)]]
-       ;; Email
        [:div
         [:label {:class (styles/get-class :form-label)} "Email"]
         [:p   {:class "mt-1 text-gray-900"} (:email user)]]
-       ;; Optional Name
        (when-let [name (:name user)]
          [:div
           [:label {:class (styles/get-class :form-label)} "Name"]
           [:p   {:class "mt-1 text-gray-900"} name]])]
-      ;; Action buttons: Back on the left, Roles on the right
       [:div {:class "flex justify-center mt-6 space-x-4"}
        [:a {:href  "/private/auth/list-users"
             :class (styles/get-class :cancel-button)}
