@@ -1,8 +1,7 @@
 (ns pulaplab.auth.db
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
-            [pulaplab.db.core :as db :refer [db-spec]]
-            [clojure.string :as str])
+            [pulaplab.db.core :as db :refer [db-spec]])
   (:import (java.util UUID)))
 
 ;; ---------------------------
@@ -238,11 +237,11 @@
 
 (defn unassign-role-from-user!
   [user-id role-id]
-  (jdbc/execute! db-spec
+  (jdbc/execute! db/datasource
                  ["DELETE FROM user_roles WHERE user_id = ? AND role_id = ?" user-id role-id]))
 
 (defn get-user-permissions [user-id]
-  (jdbc/execute! db-spec
+  (jdbc/execute! db/datasource
                  ["WITH user_role_permissions AS (
                      SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, r.name AS role_name
                      FROM permissions p
@@ -309,9 +308,7 @@
                UNION ALL
                SELECT * FROM unassigned_permissions
                ORDER BY source, permission_name"]
-    (let [result (jdbc/execute! db-spec [query user-id user-id] {:builder-fn rs/as-unqualified-lower-maps})]
-      (println "Debug: Query result" result)
-      result)))
+    (jdbc/execute! db/datasource [query user-id user-id] {:builder-fn rs/as-unqualified-lower-maps})))
 
 (defn assign-permission-to-user! [user-id permission-id]
   (let [existing (jdbc/execute! db/datasource
@@ -330,3 +327,46 @@
                  ["DELETE FROM user_permissions WHERE user_id = ? AND permission_id = ?"
                   user-id
                   permission-id]))
+
+;; ---------------------------
+;; Role-Permission Relationships
+;; ---------------------------
+
+(defn get-permissions-with-assignment-status-for-role [role-id]
+  (println "Debug: Executing get-permissions-with-assignment-status-for-role query for role-id" role-id)
+  (let [query "WITH role_permissions_for_role AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, 'Assigned' AS source
+                 FROM permissions p
+                 JOIN role_permissions rp ON p.id = rp.permission_id
+                 WHERE rp.role_id = ?
+               ),
+               all_permissions AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name
+                 FROM permissions p
+               ),
+               unassigned_permissions AS (
+                 SELECT DISTINCT ap.permission_id, ap.permission_name, 'Unassigned' AS source
+                 FROM all_permissions ap
+                 LEFT JOIN role_permissions rp ON ap.permission_id = rp.permission_id AND rp.role_id = ?
+                 WHERE rp.permission_id IS NULL
+               )
+               SELECT * FROM role_permissions_for_role
+               UNION ALL
+               SELECT * FROM unassigned_permissions
+               ORDER BY source, permission_name"]
+    (let [result (jdbc/execute! db/datasource [query role-id role-id] {:builder-fn rs/as-unqualified-lower-maps})]
+      (println "Debug: Query result" result)
+      result)))
+
+(defn assign-permission-to-role! [role-id permission-id]
+  (println "Debug: Assigning permission" permission-id "to role" role-id)
+  (jdbc/execute! db/datasource
+                 ["INSERT INTO role_permissions (role_id, permission_id, created_at, updated_at)
+                  VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                  role-id permission-id]))
+
+(defn unassign-permission-from-role! [role-id permission-id]
+  (println "Debug: Unassigning permission" permission-id "from role" role-id)
+  (jdbc/execute! db/datasource
+                 ["DELETE FROM role_permissions WHERE role_id = ? AND permission_id = ?"
+                  role-id permission-id]))
