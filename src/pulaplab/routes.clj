@@ -5,26 +5,6 @@
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [pulaplab.auth.handlers          :as auth-web]))
 
-(defn not-found-handler
-  "Return a 404 response when no route matches."
-  [_]
-  {:status  404
-   :headers {"Content-Type" "text/plain"}
-   :body    "Not found"})
-
-(def public-routes
-  [;; NOTE: edirecting to list users for now
-   ;; ["/" {:get (fn [_]
-   ;;               {:status  200
-   ;;                :headers {"Content-Type" "text/plain"}
-   ;;                :body    "Welcome to Pulap!"})}]
-   ["/" {:get (fn [_]
-                (redirect "/private/auth/list-users"))}]
-   ["/health" {:get (fn [_]
-                      {:status  200
-                       :headers {"Content-Type" "text/plain"}
-                       :body    "OK"})}]])
-
 (def private-routes
   [["/admin" {:get (fn [_]
                      {:status  200
@@ -79,6 +59,25 @@
    ["/auth/assign-permission-to-resource" {:post auth-web/assign-permission-to-resource}]
    ["/auth/unassign-permission-from-resource" {:post auth-web/unassign-permission-from-resource}]])
 
+(defn not-found-handler
+  "Return a 404 response when no route matches."
+  [_]
+  {:status  404
+   :headers {"Content-Type" "text/plain"}
+   :body    "Not found"})
+
+(def public-routes
+  [;; NOTE: edirecting to list users for now
+   ;; ["/" {:get (fn [_]
+   ;;               {:status  200
+   ;;                :headers {"Content-Type" "text/plain"}
+   ;;                :body    "Welcome to Pulap!"})}]
+   ["/" {:get (fn [_]
+                (redirect "/private/auth/list-users"))}]
+   ["/health" {:get (fn [_]
+                      {:status  200
+                       :headers {"Content-Type" "text/plain"}
+                       :body    "OK"})}]])
 
 (def app
   (-> (ring/ring-handler
