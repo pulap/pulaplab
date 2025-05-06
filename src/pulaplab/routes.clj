@@ -1,4 +1,4 @@
-(ns pulaplab.handlers.core
+(ns pulaplab.routes
   (:require
    [ring.util.response :refer [redirect]]
    [reitit.ring :as ring]

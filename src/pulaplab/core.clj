@@ -1,5 +1,5 @@
 (ns pulaplab.core
-  (:require [pulaplab.handlers.core :as handlers]
+  (:require [pulaplab.routes :as routes]
             [pulaplab.db.core :as db]
             [pulaplab.db.migrations :as migrations]
             [ring.adapter.jetty :as jetty]))
@@ -7,8 +7,8 @@
 (defonce server (atom nil))
 
 (defn app []
-  (require 'pulaplab.handlers.core :reload)
-  handlers/app)
+  (require 'pulaplab.routes :reload)
+  routes/app)
 
 (defn stop-server []
   (when @server
