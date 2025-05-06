@@ -240,3 +240,93 @@
   [user-id role-id]
   (jdbc/execute! db-spec
                  ["DELETE FROM user_roles WHERE user_id = ? AND role_id = ?" user-id role-id]))
+
+(defn get-user-permissions [user-id]
+  (jdbc/execute! db-spec
+                 ["WITH user_role_permissions AS (
+                     SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, r.name AS role_name
+                     FROM permissions p
+                     JOIN role_permissions rp ON p.id = rp.permission_id
+                     JOIN user_roles ur ON rp.role_id = ur.role_id
+                     JOIN roles r ON ur.role_id = r.id
+                     WHERE ur.user_id = ?
+                   ),
+                   user_direct_permissions AS (
+                     SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, 'Direct' AS source
+                     FROM permissions p
+                     JOIN user_permissions up ON p.id = up.permission_id
+                     WHERE up.user_id = ? AND p.id IS NOT NULL
+                   ),
+                   all_permissions AS (
+                     SELECT DISTINCT p.id AS permission_id, p.name AS permission_name
+                     FROM permissions p
+                   ),
+                   unassigned_permissions AS (
+                     SELECT DISTINCT ap.permission_id, ap.permission_name, 'Unassigned' AS source
+                     FROM all_permissions ap
+                     LEFT JOIN user_role_permissions urp ON ap.permission_id = urp.permission_id
+                     LEFT JOIN user_direct_permissions udp ON ap.permission_id = udp.permission_id
+                     WHERE urp.permission_id IS NULL AND udp.permission_id IS NULL
+                   )
+                   SELECT * FROM user_role_permissions
+                   UNION ALL
+                   SELECT * FROM user_direct_permissions
+                   UNION ALL
+                   SELECT * FROM unassigned_permissions
+                   ORDER BY source, permission_name"]
+                 {:builder-fn rs/as-unqualified-lower-maps}))
+
+(defn get-permissions-with-assignment-status [user-id]
+  (println "Debug: Executing get-permissions-with-assignment-status query for user-id" user-id)
+  (let [query "WITH user_role_permissions AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, 'Role - ' || r.name AS source
+                 FROM permissions p
+                 JOIN role_permissions rp ON p.id = rp.permission_id
+                 JOIN user_roles ur ON rp.role_id = ur.role_id
+                 JOIN roles r ON ur.role_id = r.id
+                 WHERE ur.user_id = ?
+               ),
+               user_direct_permissions AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, 'Direct' AS source
+                 FROM permissions p
+                 JOIN user_permissions up ON p.id = up.permission_id
+                 WHERE up.user_id = ?
+               ),
+               all_permissions AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name
+                 FROM permissions p
+               ),
+               unassigned_permissions AS (
+                 SELECT DISTINCT ap.permission_id, ap.permission_name, 'Unassigned' AS source
+                 FROM all_permissions ap
+                 LEFT JOIN user_role_permissions urp ON ap.permission_id = urp.permission_id
+                 LEFT JOIN user_direct_permissions udp ON ap.permission_id = udp.permission_id
+                 WHERE urp.permission_id IS NULL AND udp.permission_id IS NULL
+               )
+               SELECT * FROM user_role_permissions
+               UNION ALL
+               SELECT * FROM user_direct_permissions
+               UNION ALL
+               SELECT * FROM unassigned_permissions
+               ORDER BY source, permission_name"]
+    (let [result (jdbc/execute! db-spec [query user-id user-id] {:builder-fn rs/as-unqualified-lower-maps})]
+      (println "Debug: Query result" result)
+      result)))
+
+(defn assign-permission-to-user! [user-id permission-id]
+  (let [existing (jdbc/execute! db/datasource
+                                ["SELECT 1 FROM user_permissions WHERE user_id = ? AND permission_id = ?"
+                                 user-id
+                                 permission-id])]
+    (when (empty? existing)
+      (jdbc/execute! db/datasource
+                     ["INSERT INTO user_permissions (user_id, permission_id, created_at, updated_at)
+                       VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                      user-id
+                      permission-id]))))
+
+(defn unassign-permission-from-user! [user-id permission-id]
+  (jdbc/execute! db/datasource
+                 ["DELETE FROM user_permissions WHERE user_id = ? AND permission_id = ?"
+                  user-id
+                  permission-id]))
