@@ -296,3 +296,10 @@
     {:status 302
      :headers {"Location" (str "/private/auth/list-user-roles?id=" user-id)}
      :body ""}))
+
+(defn unassign-role-handler [request]
+  (let [{:strs [user-id role-id]} (:form-params request)]
+    (auth-db/unassign-role-from-user! user-id role-id)
+    {:status 302
+     :headers {"Location" (str "/private/auth/list-user-roles?id=" user-id)}
+     :body ""}))

@@ -158,8 +158,10 @@
           [:td {:class (styles/get-class :td-primary)} (:role_name role)]
           [:td {:class (styles/get-class :td-secondary)} (:role_description role)]
           [:td {:class (styles/get-class :td-actions)}
-           [:a {:href (str "/unassign-role/" user-id "/" (:role_id role))
-                :class (styles/get-class :button-delete)} "Unassign"]]])]]
+           (core/form {:action "/private/auth/unassign-role-from-user" :method "POST" :class "inline"}
+                      [:input {:type "hidden" :name "user-id" :value user-id}]
+                      [:input {:type "hidden" :name "role-id" :value (:role_id role)}]
+                      [:button {:type "submit" :class (styles/get-class :button-delete)} "Unassign"])]])]]
 
      ;; Table for unassigned roles
      [:h2 {:class "text-xl font-bold mb-2"} "Unassigned Roles"]
