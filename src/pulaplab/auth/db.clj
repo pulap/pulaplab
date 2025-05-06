@@ -370,3 +370,65 @@
   (jdbc/execute! db/datasource
                  ["DELETE FROM role_permissions WHERE role_id = ? AND permission_id = ?"
                   role-id permission-id]))
+
+;; ---------------------------
+;; Resource-Permission Relationships
+;; ---------------------------
+
+(defn get-permissions-with-assignment-status-for-resource [resource-id]
+  (println "Debug: Executing get-permissions-with-assignment-status-for-resource query for resource-id" resource-id)
+  (let [query "WITH resource_permissions_for_resource AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name, 'Assigned' AS source
+                 FROM permissions p
+                 JOIN resource_permissions rp ON p.id = rp.permission_id
+                 WHERE rp.resource_id = ?
+               ),
+               all_permissions AS (
+                 SELECT DISTINCT p.id AS permission_id, p.name AS permission_name
+                 FROM permissions p
+               ),
+               unassigned_permissions AS (
+                 SELECT DISTINCT ap.permission_id, ap.permission_name, 'Unassigned' AS source
+                 FROM all_permissions ap
+                 LEFT JOIN resource_permissions rp ON ap.permission_id = rp.permission_id AND rp.resource_id = ?
+                 WHERE rp.permission_id IS NULL
+               )
+               SELECT * FROM resource_permissions_for_resource
+               UNION ALL
+               SELECT * FROM unassigned_permissions
+               ORDER BY source, permission_name"]
+    (let [result (jdbc/execute! db/datasource [query resource-id resource-id] {:builder-fn rs/as-unqualified-lower-maps})]
+      (println "Debug: Query result" result)
+      result)))
+
+(defn assign-permission-to-resource! [resource-id permission-id]
+  (let [query "INSERT INTO resource_permissions (resource_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING"]
+    (jdbc/execute! db-spec [query resource-id permission-id])))
+
+(defn unassign-permission-from-resource! [resource-id permission-id]
+  (let [query "DELETE FROM resource_permissions WHERE resource_id = ? AND permission_id = ?"]
+    (jdbc/execute! db-spec [query resource-id permission-id])))
+
+(defn get-resources-with-permission [permission-id]
+  (println "Debug: Fetching resources with permission" permission-id)
+  (let [query "WITH assigned_resources AS (
+                 SELECT DISTINCT r.id AS resource_id, r.name AS resource_name, 'Assigned' AS status
+                 FROM resources r
+                 JOIN resource_permissions rp ON r.id = rp.resource_id
+                 WHERE rp.permission_id = ?
+               ),
+               all_resources AS (
+                 SELECT DISTINCT r.id AS resource_id, r.name AS resource_name
+                 FROM resources r
+               ),
+               unassigned_resources AS (
+                 SELECT DISTINCT ar.resource_id, ar.resource_name, 'Unassigned' AS status
+                 FROM all_resources ar
+                 LEFT JOIN resource_permissions rp ON ar.resource_id = rp.resource_id AND rp.permission_id = ?
+                 WHERE rp.resource_id IS NULL
+               )
+               SELECT * FROM assigned_resources
+               UNION ALL
+               SELECT * FROM unassigned_resources
+               ORDER BY status, resource_name"]
+    (jdbc/execute! db/datasource [query permission-id permission-id] {:builder-fn rs/as-unqualified-lower-maps})))

@@ -4,7 +4,8 @@
             [pulaplab.auth.ui.permission :as permission-pages]
             [pulaplab.auth.ui.resource :as resource-pages]
             [pulaplab.auth.db :as auth-db]
-            [hiccup.page :as page]))
+            [hiccup.page :as page]
+            [pulaplab.auth.service :as auth-service]))
 
 ;; -------------------
 ;; User handlers
@@ -345,4 +346,25 @@
     (auth-db/unassign-permission-from-role! role-id permission-id)
     {:status 302
      :headers {"Location" (str "/private/auth/list-role-permissions?id=" role-id)}
+     :body ""}))
+
+(defn list-resource-permissions-handler [request]
+  (let [resource-id (get-in request [:query-params "id"])
+        permissions (auth-db/get-permissions-with-assignment-status-for-resource resource-id)]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (hiccup.page/html5 (permission-pages/list-resource-permissions resource-id permissions))}))
+
+(defn assign-permission-to-resource-handler [request]
+  (let [{:keys [resource-id permission-id]} (:params request)]
+    (auth-service/assign-permission-to-resource! resource-id permission-id)
+    {:status 302
+     :headers {"Location" (str "/private/auth/list-resource-permissions?id=" resource-id)}
+     :body ""}))
+
+(defn unassign-permission-from-resource-handler [request]
+  (let [{:keys [resource-id permission-id]} (:params request)]
+    (auth-service/unassign-permission-from-resource! resource-id permission-id)
+    {:status 302
+     :headers {"Location" (str "/private/auth/list-resource-permissions?id=" resource-id)}
      :body ""}))
