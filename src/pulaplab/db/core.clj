@@ -1,9 +1,8 @@
 (ns pulaplab.db.core
-  (:require [next.jdbc :as jdbc]))
+  (:require [next.jdbc :as jdbc]
+            [pulaplab.config :as config]))
 
-(def db-spec
-  {:dbtype "sqlite"
-   :dbname "pulaplab.db"})
+(def db-spec (:db-spec (config/get-config :dev))) ;; Default to :dev, can be overridden in tests
 
 (def datasource (jdbc/get-datasource db-spec))
 

@@ -154,6 +154,7 @@
      (core/form {:action (str "/private/auth/update-user?id=" (:id user))
                  :method "POST"
                  :class  "space-y-6"}
+                [:input {:type "hidden" :name "id" :value (:id user)}]
                 [:div
                  [:label {:for   "username"
                           :class (styles/get-class :form-label)}

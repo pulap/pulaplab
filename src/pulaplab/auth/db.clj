@@ -1,8 +1,9 @@
 (ns pulaplab.auth.db
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
-            [pulaplab.db.core :as db :refer [db-spec]]
-            [pulaplab.auth.query :refer [queries]])
+            [pulaplab.db.core :as db]
+            [pulaplab.auth.query :refer [queries get-query]]
+            [clojure.tools.logging :as log])
   (:import (java.util UUID)))
 
 ;; ---------------------------
@@ -23,23 +24,32 @@
 ;; We also normalize the keys (e.g., :email instead of :email_enc) to simplify views.
 
 (defn list-users []
-  (->> (jdbc/execute! db/datasource
-                      [(queries :list-users)]
-                      {:builder-fn rs/as-unqualified-lower-maps})
-       (map (fn [row]
-              {:id (:id row)
-               :username (:username row)
-               :email (some-> (:email_enc row) (String.))}))))
+  (log/debug "DB list-users query")
+  (let [rows (jdbc/execute! db/datasource [(get-query :list-users)] {:builder-fn rs/as-unqualified-lower-maps})
+        users (map (fn [row] {:id (:id row)
+                              :username (:username row)
+                              :email (some-> (:email_enc row) (String.))})
+                   rows)]
+    (log/debug "DB list-users result:" users)
+    users))
 
 (defn get-user-by-id [id]
   (let [row (first (jdbc/execute! db/datasource
-                                  [(queries :get-user-by-id) id]
+                                  [(get-query :get-user-by-id) id]
                                   {:builder-fn rs/as-unqualified-lower-maps}))]
     (when row
       {:id (:id row)
        :username (:username row)
        :email (some-> (:email_enc row) (String.))})))
 
+(defn get-user-by-username [username]
+  (let [row (first (jdbc/execute! db/datasource
+                                  [(get-query :get-user-by-username) username]
+                                  {:builder-fn rs/as-unqualified-lower-maps}))]
+    (when row
+      {:id (:id row)
+       :username (:username row)
+       :email (some-> (:email_enc row) (String.))})))
 
 (defn create-user! [{:keys [username email]}]
   (jdbc/execute! db/datasource
@@ -64,18 +74,19 @@
 ;; ---------------------------
 
 (defn list-roles []
-  (->> (jdbc/execute! db/datasource
-                      [(queries :list-roles)]
-                      {:builder-fn rs/as-unqualified-lower-maps})
-       (map (fn [row]
-              {:id          (:id row)
-               :slug        (:slug row)
-               :name        (:name row)
-               :description (:description row)}))))
+  (log/debug "DB list-roles query")
+  (let [rows (jdbc/execute! db/datasource [(get-query :list-roles)] {:builder-fn rs/as-unqualified-lower-maps})
+        roles (map (fn [row] {:id (:id row)
+                              :slug (:slug row)
+                              :name (:name row)
+                              :description (:description row)})
+                   rows)]
+    (log/debug "DB list-roles result:" roles)
+    roles))
 
 (defn get-role-by-id [id]
   (when-let [row (first (jdbc/execute! db/datasource
-                                       [(queries :get-role-by-id) id]
+                                       [(get-query :get-role-by-id) id]
                                        {:builder-fn rs/as-unqualified-lower-maps}))]
     {:id          (:id row)
      :slug        (:slug row)
@@ -107,18 +118,19 @@
 ;; ---------------------------
 
 (defn list-permissions []
-  (->> (jdbc/execute! db/datasource
-                      [(queries :list-permissions)]
-                      {:builder-fn rs/as-unqualified-lower-maps})
-       (map (fn [row]
-              {:id          (:id row)
-               :slug        (:slug row)
-               :name        (:name row)
-               :description (:description row)}))))
+  (log/debug "DB list-permissions query")
+  (let [rows (jdbc/execute! db/datasource [(get-query :list-permissions)] {:builder-fn rs/as-unqualified-lower-maps})
+        perms (map (fn [row] {:id (:id row)
+                              :slug (:slug row)
+                              :name (:name row)
+                              :description (:description row)})
+                   rows)]
+    (log/debug "DB list-permissions result:" perms)
+    perms))
 
 (defn get-permission-by-id [id]
   (when-let [row (first (jdbc/execute! db/datasource
-                                       [(queries :get-permission-by-id) id]
+                                       [(get-query :get-permission-by-id) id]
                                        {:builder-fn rs/as-unqualified-lower-maps}))]
     {:id          (:id row)
      :slug        (:slug row)
@@ -150,18 +162,19 @@
 ;; ---------------------------
 
 (defn list-resources []
-  (->> (jdbc/execute! db/datasource
-                      [(queries :list-resources)]
-                      {:builder-fn rs/as-unqualified-lower-maps})
-       (map (fn [row]
-              {:id          (:id row)
-               :slug        (:slug row)
-               :name        (:name row)
-               :description (:description row)}))))
+  (log/debug "DB list-resources query")
+  (let [rows (jdbc/execute! db/datasource [(get-query :list-resources)] {:builder-fn rs/as-unqualified-lower-maps})
+        resources (map (fn [row] {:id (:id row)
+                                  :slug (:slug row)
+                                  :name (:name row)
+                                  :description (:description row)})
+                       rows)]
+    (log/debug "DB list-resources result:" resources)
+    resources))
 
 (defn get-resource-by-id [id]
   (when-let [row (first (jdbc/execute! db/datasource
-                                       [(queries :get-resource-by-id) id]
+                                       [(get-query :get-resource-by-id) id]
                                        {:builder-fn rs/as-unqualified-lower-maps}))]
     {:id          (:id row)
      :slug        (:slug row)
@@ -198,9 +211,22 @@
                  [(queries :get-roles-with-assignment-status) user-id]
                  {:builder-fn rs/as-unqualified-lower-maps}))
 
+;; Retrieves role IDs assigned to a user
+(defn get-user-roles [user-id]
+  (->> (jdbc/execute! db/datasource
+                      [(queries :get-user-roles) user-id]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map :role_id)))
+
 (defn assign-role-to-user! [user-id role-id]
-  (jdbc/execute! db/datasource
-                 [(queries :assign-role-to-user) user-id role-id]))
+  (log/debug "[db] assign-role-to-user! user-id:" user-id "role-id:" role-id)
+  (try
+    (let [result (jdbc/execute! db/datasource
+                                [(queries :assign-role-to-user) user-id role-id])]
+      (log/debug "[db] assign-role-to-user! jdbc result:" result)
+      result)
+    (catch Exception e
+      (log/debug "[db] assign-role-to-user! Exception:" (.getMessage e)))))
 
 (defn unassign-role-from-user!
   [user-id role-id]
@@ -208,18 +234,22 @@
                  [(queries :unassign-role-from-user) user-id role-id]))
 
 (defn get-user-permissions [user-id]
-  (jdbc/execute! db/datasource
-                 [(queries :get-user-permissions) user-id user-id]
-                 {:builder-fn rs/as-unqualified-lower-maps}))
+  (->> (jdbc/execute! db/datasource
+                      [(queries :get-user-permissions) user-id user-id]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map :permission_id)))
 
-(defn get-permissions-with-assignment-status [user-id]
+(defn get-permissions-with-assignment-status-for-user [user-id]
   (jdbc/execute! db/datasource
-                 [(queries :get-permissions-with-assignment-status) user-id user-id]
+                 [(queries :get-permissions-with-assignment-status-for-user) user-id user-id]
                  {:builder-fn rs/as-unqualified-lower-maps}))
 
 (defn assign-permission-to-user! [user-id permission-id]
-  (jdbc/execute! db/datasource
-                 [(queries :assign-permission-to-user) user-id permission-id]))
+  (let [sql (get-query :assign-permission-to-user)]
+    (log/debug "[db] assign-permission-to-user! SQL:" sql "user-id:" user-id "permission-id:" permission-id)
+    (let [result (jdbc/execute! db/datasource [sql user-id permission-id])]
+      (log/debug "[db] assign-permission-to-user! result:" result)
+      result)))
 
 (defn unassign-permission-from-user! [user-id permission-id]
   (jdbc/execute! db/datasource
@@ -229,28 +259,42 @@
 ;; Role-Permission Relationships
 ;; ---------------------------
 
+;; Retrieves permission IDs assigned to a role
+(defn get-role-permissions [role-id]
+  (->> (jdbc/execute! db/datasource
+                      [(queries :get-role-permissions) role-id]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map :permission_id)))
+
 (defn get-permissions-with-assignment-status-for-role [role-id]
-  (println "Debug: Executing get-permissions-with-assignment-status-for-role query for role-id" role-id)
+  (log/debug "Executing get-permissions-with-assignment-status-for-role query for role-id" role-id)
   (let [result (jdbc/execute! db/datasource [(queries :get-permissions-with-assignment-status-for-role) role-id role-id] {:builder-fn rs/as-unqualified-lower-maps})]
-    (println "Debug: Query result" result)
+    (log/debug "Query result" result)
     result))
 
 (defn assign-permission-to-role! [role-id permission-id]
-  (println "Debug: Assigning permission" permission-id "to role" role-id)
+  (log/debug "Assigning permission" permission-id "to role" role-id)
   (jdbc/execute! db/datasource [(queries :assign-permission-to-role) role-id permission-id]))
 
 (defn unassign-permission-from-role! [role-id permission-id]
-  (println "Debug: Unassigning permission" permission-id "from role" role-id)
+  (log/debug "Unassigning permission" permission-id "from role" role-id)
   (jdbc/execute! db/datasource [(queries :unassign-permission-from-role) role-id permission-id]))
 
 ;; ---------------------------
 ;; Resource-Permission Relationships
 ;; ---------------------------
 
+;; Retrieves permission IDs assigned to a resource
+(defn get-resource-permissions [resource-id]
+  (->> (jdbc/execute! db/datasource
+                      [(queries :get-resource-permissions) resource-id]
+                      {:builder-fn rs/as-unqualified-lower-maps})
+       (map :permission_id)))
+
 (defn get-permissions-with-assignment-status-for-resource [resource-id]
-  (println "Debug: Executing get-permissions-with-assignment-status-for-resource query for resource-id" resource-id)
+  (log/debug "Executing get-permissions-with-assignment-status-for-resource query for resource-id" resource-id)
   (let [result (jdbc/execute! db/datasource [(queries :get-permissions-with-assignment-status-for-resource) resource-id resource-id] {:builder-fn rs/as-unqualified-lower-maps})]
-    (println "Debug: Query result" result)
+    (log/debug "Query result" result)
     result))
 
 (defn assign-permission-to-resource! [resource-id permission-id]
@@ -260,5 +304,5 @@
   (jdbc/execute! db/datasource [(queries :unassign-permission-from-resource) resource-id permission-id]))
 
 (defn get-resources-with-permission [permission-id]
-  (println "Debug: Fetching resources with permission" permission-id)
+  (log/debug "Fetching resources with permission" permission-id)
   (jdbc/execute! db/datasource [(queries :get-resources-with-permission) permission-id permission-id] {:builder-fn rs/as-unqualified-lower-maps}))

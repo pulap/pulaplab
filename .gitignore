@@ -20,6 +20,9 @@ cpcache/
 .lein-repl-history
 .lein-plugins/
 
+# Calva
+**/.calva/
+
 # Misc
 *.log
 *.tmp
@@ -29,3 +32,4 @@ cpcache/
 
 # Database
 pulaplab.db
+
