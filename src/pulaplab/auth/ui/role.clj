@@ -1,9 +1,7 @@
 (ns pulaplab.auth.ui.role
   (:require [pulaplab.ui.layout :refer [layout]]
             [pulaplab.ui.styles :as styles]
-            [pulaplab.auth.ui.core :as core]
-            [pulaplab.auth.ui.core :as auth-core]
-            [ring.util.anti-forgery :refer [anti-forgery-field]]))
+            [pulaplab.auth.ui.core :as core]))
 
 (defn index
   [roles flash]
@@ -23,13 +21,14 @@
         [:th {:class (styles/get-class :th)} "Description"]
         [:th {:class (styles/get-class :th-actions)} "Actions"]]]
       [:tbody {:class "bg-white divide-y divide-gray-200"}
-       (for [{:keys [id name slug]} roles]
+       (for [{:keys [id name description]} roles]
          [:tr {:key id}
           [:td {:class (styles/get-class :td-primary)}
            [:a {:href  (str "/private/auth/show-role?id=" id)
                 :class (styles/get-class :link-primary)}
             name]]
-          [:td {:class (styles/get-class :td-secondary)} slug]
+          [:td {:class (styles/get-class :td-secondary)}
+           description]
           [:td {:class (styles/get-class :td-actions)}
            [:a {:href  (str "/private/auth/show-role?id=" id)
                 :class (styles/get-class :button-show)} "Show"]
@@ -96,12 +95,9 @@
         [:label {:class (styles/get-class :form-label)} "Description"]
         [:p {:class "mt-1 text-gray-900"} (:description role)]]]
       [:div {:class "flex justify-center mt-6 space-x-4"}
-       [:a {:href  "/private/auth/list-roles"
-            :class (styles/get-class :cancel-button)}
-        "Back"]
-       [:a {:href  (str "/private/auth/list-role-permissions?id=" (:id role))
-            :class (styles/get-class :button-new)}
-        "Permissions"]]]]
+       [:a {:href "/private/auth/list-roles" :class (styles/get-class :cancel-button)} "Back"]
+       [:a {:href (str "/private/auth/list-role-permissions?id=" (:id role))
+            :class (styles/get-class :button-new)} "Permissions"]]]]
     :footer-content (core/footer)}))
 
 (defn edit
@@ -116,6 +112,7 @@
       (core/form {:action (str "/private/auth/update-role?id=" (:id role))
                   :method "POST"
                   :class  "space-y-6"}
+                 [:input {:type "hidden" :name "id" :value (:id role)}]
                  [:div
                   [:label {:for   "name" :class (styles/get-class :form-label)} "Name"]
                   [:input {:type     "text"
@@ -127,8 +124,8 @@
                   [:label {:for   "description" :class (styles/get-class :form-label)} "Description"]
                   [:textarea {:name  "description"
                               :id    "description"
-                              :class (styles/get-class :form-input)}]
-                  (:description role)]
+                              :class (styles/get-class :form-input)}
+                   (:description role)]]
                  [:div {:class "flex justify-center mt-6 space-x-4"}
                   [:a {:href  "/private/auth/list-roles"
                        :class (styles/get-class :cancel-button)}

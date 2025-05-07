@@ -21,13 +21,13 @@
         [:th {:class (styles/get-class :th)} "Description"]
         [:th {:class (styles/get-class :th-actions)} "Actions"]]]
       [:tbody {:class "bg-white divide-y divide-gray-200"}
-       (for [{:keys [id name slug]} resources]
+       (for [{:keys [id name description]} resources]
          [:tr {:key id}
           [:td {:class (styles/get-class :td-primary)}
            [:a {:href  (str "/private/auth/show-resource?id=" id)
                 :class (styles/get-class :link-primary)}
             name]]
-          [:td {:class (styles/get-class :td-secondary)} slug]
+          [:td {:class (styles/get-class :td-secondary)} description]
           [:td {:class (styles/get-class :td-actions)}
            [:a {:href  (str "/private/auth/show-resource?id=" id)
                 :class (styles/get-class :button-show)} "Show"]
@@ -114,6 +114,7 @@
       (core/form {:action (str "/private/auth/update-resource?id=" (:id resource))
                   :method "POST"
                   :class  "space-y-6"}
+                 [:input {:type "hidden" :name "id" :value (:id resource)}]
                  [:div
                   [:label {:for   "name" :class (styles/get-class :form-label)} "Name"]
                   [:input {:type     "text"
@@ -125,8 +126,8 @@
                   [:label {:for   "description" :class (styles/get-class :form-label)} "Description"]
                   [:textarea {:name  "description"
                               :id    "description"
-                              :class (styles/get-class :form-input)}]
-                  (:description resource)]
+                              :class (styles/get-class :form-input)}
+                   (:description resource)]]
                  [:div {:class "flex justify-center mt-6 space-x-4"}
                   [:a {:href  "/private/auth/list-resources"
                        :class (styles/get-class :cancel-button)}

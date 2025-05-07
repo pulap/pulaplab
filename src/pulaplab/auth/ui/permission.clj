@@ -21,13 +21,13 @@
         [:th {:class (styles/get-class :th)} "Description"]
         [:th {:class (styles/get-class :th-actions)} "Actions"]]]
       [:tbody {:class "bg-white divide-y divide-gray-200"}
-       (for [{:keys [id name slug]} permissions]
+       (for [{:keys [id name description]} permissions]
          [:tr {:key id}
           [:td {:class (styles/get-class :td-primary)}
            [:a {:href  (str "/private/auth/show-permission?id=" id)
                 :class (styles/get-class :link-primary)}
             name]]
-          [:td {:class (styles/get-class :td-secondary)} slug]
+          [:td {:class (styles/get-class :td-secondary)} description]
           [:td {:class (styles/get-class :td-actions)}
            [:a {:href  (str "/private/auth/show-permission?id=" id)
                 :class (styles/get-class :button-show)} "Show"]
@@ -111,6 +111,7 @@
       (core/form {:action (str "/private/auth/update-permission?id=" (:id permission))
                   :method "POST"
                   :class  "space-y-6"}
+                 [:input {:type "hidden" :name "id" :value (:id permission)}]
                  [:div
                   [:label {:for   "name" :class (styles/get-class :form-label)} "Name"]
                   [:input {:type     "text"
@@ -122,8 +123,7 @@
                   [:label {:for   "description" :class (styles/get-class :form-label)} "Description"]
                   [:textarea {:name  "description"
                               :id    "description"
-                              :class (styles/get-class :form-input)}]
-                  (:description permission)]
+                              :class (styles/get-class :form-input)} (:description permission)]]
                  [:div {:class "flex justify-center mt-6 space-x-4"}
                   [:a {:href  "/private/auth/list-permissions"
                        :class (styles/get-class :cancel-button)}
@@ -135,7 +135,6 @@
 
 (defn list-user-permissions
   [user-id permissions]
-  (println "Debug: Permissions map" permissions) ;; Debugging permissions map
   (layout
    {:title          "Permissions Management for User"
     :header-content (core/header)
@@ -309,12 +308,11 @@
 
      ;; Table for unassigned permissions
      [:h2 {:class "text-xl font-bold mb-2"} "Unassigned Permissions"]
-     [:table {:class (styles/get-class :table)}
-      [:thead {:class (styles/get-class :thead)}
-       [:tr
-        [:th {:class (styles/get-class :th)} "Name"]
-        [:th {:class (styles/get-class :th)} "Source"]
-        [:th {:class (styles/get-class :th-actions)} "Action"]]]
+     [:table {:class (styles/get-class :table)} [:thead {:class (styles/get-class :thead)}
+                                                 [:tr
+                                                  [:th {:class (styles/get-class :th)} "Name"]
+                                                  [:th {:class (styles/get-class :th)} "Source"]
+                                                  [:th {:class (styles/get-class :th-actions)} "Action"]]]
       [:tbody {:class "bg-white divide-y divide-gray-200"}
        (for [permission (filter #(= "Unassigned" (:source %)) permissions)]
          [:tr {:key (:permission_id permission)}

@@ -3,6 +3,8 @@
    [ring.util.response :refer [redirect]]
    [reitit.ring :as ring]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+   [pulaplab.middleware :refer [wrap-exception-handling wrap-dev-only]]
+   [pulaplab.config :refer [get-config]]
    [pulaplab.auth.handlers          :as auth-web]))
 
 (def private-routes
@@ -80,11 +82,14 @@
                        :body    "OK"})}]])
 
 (def app
-  (-> (ring/ring-handler
-       (ring/router
-        [["" {:middleware []}
-          public-routes
-          ["/private" private-routes]]])
-       (ring/create-default-handler
-        {:not-found not-found-handler}))
-      (wrap-defaults site-defaults)))
+  (let [env (keyword (or (System/getenv "PULAP_ENV") "dev"))
+        base (-> (ring/ring-handler
+                  (ring/router
+                   [["" {:middleware []} public-routes]
+                    ["/private" private-routes]])
+                  (ring/create-default-handler {:not-found not-found-handler}))
+                 (wrap-defaults site-defaults)
+                 wrap-exception-handling)]
+    (if (= env :dev)
+      (wrap-dev-only base)
+      base)))
