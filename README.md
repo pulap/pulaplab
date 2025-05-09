@@ -14,5 +14,5 @@ PulapLab is a playground for a Real Estate Manager implemented in Clojure.
 
 To run the tests:
 ```bash
-clojure -X:test
+clojure -M:test
 ```
