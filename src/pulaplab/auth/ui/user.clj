@@ -2,10 +2,22 @@
   (:require
    [pulaplab.ui.layout     :refer [layout]]
    [pulaplab.ui.styles     :as styles]
-   [pulaplab.auth.ui.core  :as core]))
+   [pulaplab.auth.ui.core  :as core]
+   [clojure.string         :as str]))
 
-;; Use the predefined `user-views` function from `pulaplab.ui.styles`
-(def sc (styles/user-views))
+;; Updated to use the unified `views` function
+(def sc (styles/views))
+
+(def base-url "/private/auth/")
+
+(defn url [command & [params]]
+  (str base-url command
+       (when params
+         (str "?" (str/join "&" (map (fn [[k v]] (str (name k) "=" v)) params))))))
+
+;; Example usage:
+;; (url "show-user" {:id 123}) => "/private/auth/show-user?id=123"
+;; (url "list-users") => "/private/auth/list-users"
 
 (defn index
   [users flash]
@@ -24,25 +36,25 @@
         [:th {:class (:th sc)} "Username"]
         [:th {:class (:th sc)} "Email"]
         [:th {:class (:th-actions sc)} "Actions"]]]
-      [:tbody {:class "bg-white divide-y divide-gray-200"}
+      [:tbody {:class (sc :tbody)}
        (for [{:keys [id username email]} users]
          [:tr {:key id}
           [:td {:class (:td-primary sc)}
-           [:a {:href  (str "/private/auth/show-user?id=" id)
+           [:a {:href  (url "show-user" {:id id})
                 :class (:link-primary sc)}
             username]]
           [:td {:class (:td-secondary sc)} email]
           [:td {:class (:td-actions sc)}
-           [:a {:href  (str "/private/auth/show-user?id=" id)
+           [:a {:href  (url "show-user" {:id id})
                 :class (:button-show sc)} "Show"]
-           [:a {:href  (str "/private/auth/edit-user?id=" id)
+           [:a {:href  (url "edit-user" {:id id})
                 :class (:button-edit sc)} "Edit"]
-           (core/form {:action "/private/auth/delete-user" :method "POST" :class "inline"}
+           (core/form {:action (url "delete-user") :method "POST" :class "inline"}
                       [:input {:type "hidden" :name "id" :value id}]
                       [:button {:type  "submit" :class (:button-delete sc)}
                        "Delete"])]])]]
      [:div {:class "flex justify-center mt-6"}
-      [:a {:href "/private/auth/new-user"
+      [:a {:href (url "new-user")
            :class (:button-new sc)}
        "New"]]]
     :footer-content (core/footer)}))
@@ -56,7 +68,7 @@
     [:div {:class "flex justify-center"}
      [:div {:class "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"}
       [:h1 {:class "text-2xl font-bold mb-6 text-center"} "Create New User"]
-      (core/form {:action "/private/auth/create-user"
+      (core/form {:action (url "create-user")
                   :method "POST"
                   :class  "space-y-6"}
                  [:input {:type  "hidden" :name "id" :value ""}]
@@ -105,7 +117,7 @@
                            :required true
                            :class    (:form-input sc)}]]
                  [:div {:class "flex justify-center mt-6 space-x-4"}
-                  [:a {:href  "/private/auth/list-users"
+                  [:a {:href  (url "list-users")
                        :class (:cancel-button sc)}
                    "Back"]
                   [:button {:type  "submit"
@@ -134,13 +146,13 @@
           [:label {:class (:form-label sc)} "Name"]
           [:p   {:class "mt-1 text-gray-900"} name]])]
       [:div {:class "flex justify-center mt-6 space-x-4"}
-       [:a {:href  "/private/auth/list-users"
+       [:a {:href  (url "list-users")
             :class (:cancel-button sc)}
         "Back"]
-       [:a {:href  (str "/private/auth/list-user-roles?id=" (:id user))
+       [:a {:href  (url "list-user-roles" {:id (:id user)})
             :class (:button-new sc)}
         "Roles"]
-       [:a {:href  (str "/private/auth/list-user-permissions?id=" (:id user))
+       [:a {:href  (url "list-user-permissions" {:id (:id user)})
             :class (:button-new sc)}
         "Permissions"]]]]
     :footer-content (core/footer)}))
@@ -154,7 +166,7 @@
     :main-content
     [:div {:class (:container sc)}
      [:h1 {:class "text-2xl font-bold mb-4"} "Edit User"]
-     (core/form {:action (str "/private/auth/update-user?id=" (:id user))
+     (core/form {:action (url "update-user" {:id (:id user)})
                  :method "POST"
                  :class  "space-y-6"}
                 [:input {:type "hidden" :name "id" :value (:id user)}]
@@ -179,7 +191,7 @@
                           :required true
                           :class    (:form-input sc)}]]
                 [:div {:class "flex justify-end space-x-4"}
-                 [:a {:href  "/private/auth/list-users"
+                 [:a {:href  (url "list-users")
                       :class (:cancel-button sc)}
                   "Cancel"]
                  [:button {:type  "submit"

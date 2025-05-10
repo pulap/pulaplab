@@ -1,10 +1,18 @@
 (ns pulaplab.auth.ui.resource
   (:require [pulaplab.ui.layout :refer [layout]]
             [pulaplab.ui.styles :as styles]
-            [pulaplab.auth.ui.core :as core]))
+            [pulaplab.auth.ui.core :as core]
+            [clojure.string :as str]))
 
-;; Use the predefined `resource-views` function from `pulaplab.ui.styles`
-(def sc (styles/resource-views))
+;; Updated to use the unified `views` function
+(def sc (styles/views))
+
+(def base-url "/private/auth/")
+
+(defn url [command & [params]]
+  (str base-url command
+       (when params
+         (str "?" (str/join "&" (map (fn [[k v]] (str (name k) "=" v)) params))))))
 
 (defn index
   [resources flash]
@@ -23,25 +31,25 @@
         [:th {:class (sc :th)} "Name"]
         [:th {:class (sc :th)} "Description"]
         [:th {:class (sc :th-actions)} "Actions"]]]
-      [:tbody {:class "bg-white divide-y divide-gray-200"}
+      [:tbody {:class (sc :tbody)}
        (for [{:keys [id name description]} resources]
          [:tr {:key id}
           [:td {:class (sc :td-primary)}
-           [:a {:href  (str "/private/auth/show-resource?id=" id)
+           [:a {:href  (url "show-resource" {:id id})
                 :class (sc :link-primary)}
             name]]
           [:td {:class (sc :td-secondary)} description]
           [:td {:class (sc :td-actions)}
-           [:a {:href  (str "/private/auth/show-resource?id=" id)
+           [:a {:href  (url "show-resource" {:id id})
                 :class (sc :button-show)} "Show"]
-           [:a {:href  (str "/private/auth/edit-resource?id=" id)
+           [:a {:href  (url "edit-resource" {:id id})
                 :class (sc :button-edit)} "Edit"]
-           (core/form {:action "/private/auth/delete-resource" :method "POST" :class "inline"}
+           (core/form {:action (url "delete-resource") :method "POST" :class "inline"}
                       [:input {:type "hidden" :name "id" :value id}]
                       [:button {:type  "submit" :class (sc :button-delete)}
                        "Delete"])]])]]
      [:div {:class "flex justify-center mt-6"}
-      [:a {:href "/private/auth/new-resource"
+      [:a {:href (url "new-resource")
            :class (sc :button-new)}
        "New"]]]
     :footer-content (core/footer)}))
@@ -55,7 +63,7 @@
     [:div {:class "flex justify-center"}
      [:div {:class "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"}
       [:h1 {:class "text-2xl font-bold mb-6 text-center"} "Create New Resource"]
-      (core/form {:action "/private/auth/create-resource"
+      (core/form {:action (url "create-resource")
                   :method "POST"
                   :class  "space-y-6"}
                  [:input {:type  "hidden" :name "id" :value ""}]
@@ -72,7 +80,7 @@
                               :id    "description"
                               :class (sc :form-input)}]]
                  [:div {:class "flex justify-center mt-6 space-x-4"}
-                  [:a {:href  "/private/auth/list-resources"
+                  [:a {:href  (url "list-resources")
                        :class (sc :cancel-button)}
                    "Back"]
                   [:button {:type  "submit"
@@ -97,10 +105,10 @@
         [:label {:class (sc :form-label)} "Description"]
         [:p {:class "mt-1 text-gray-900"} (:description resource)]]]
       [:div {:class "flex justify-center mt-6 space-x-4"}
-       [:a {:href  "/private/auth/list-resources"
+       [:a {:href  (url "list-resources")
             :class (sc :cancel-button)}
         "Back"]
-       [:a {:href  (str "/private/auth/list-resource-permissions?id=" (:id resource))
+       [:a {:href  (url "list-resource-permissions" {:id (:id resource)})
             :class (sc :button-new)}
         "Permissions"]]]]
     :footer-content (core/footer)}))
@@ -114,7 +122,7 @@
     [:div {:class "flex justify-center"}
      [:div {:class "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"}
       [:h1 {:class "text-2xl font-bold mb-6 text-center"} "Edit Resource"]
-      (core/form {:action (str "/private/auth/update-resource?id=" (:id resource))
+      (core/form {:action (url "update-resource" {:id (:id resource)})
                   :method "POST"
                   :class  "space-y-6"}
                  [:input {:type "hidden" :name "id" :value (:id resource)}]
@@ -132,7 +140,7 @@
                               :class (sc :form-input)}
                    (:description resource)]]
                  [:div {:class "flex justify-center mt-6 space-x-4"}
-                  [:a {:href  "/private/auth/list-resources"
+                  [:a {:href  (url "list-resources")
                        :class (sc :cancel-button)}
                    "Cancel"]
                   [:button {:type  "submit"
