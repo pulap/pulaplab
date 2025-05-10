@@ -22,7 +22,39 @@
    :cancel-button "bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
    :container "space-y-8 max-w-md mx-auto"})
 
-
-
 (defn get-class [k]
   (get classes k))
+
+(defn generate-style-map
+  "Generates a map of styles dynamically based on the provided keys."
+  [keys]
+  (into {}
+        (map (fn [k] [k (get-class k)]) keys)))
+
+(defn user-views
+  "Returns a predefined style map for user views."
+  []
+  (generate-style-map [:table :thead :th :th-actions :td-primary :td-secondary :td-actions
+                       :link-primary :button-show :button-edit :button-delete :button-new
+                       :form-label :form-input :cancel-button :container]))
+
+(defn role-views
+  "Returns a predefined style map for role views."
+  []
+  (generate-style-map [:table :thead :th :th-actions :td-primary :td-secondary :td-actions
+                       :link-primary :button-show :button-edit :button-delete :button-new
+                       :form-label :form-input :cancel-button :container]))
+
+(defn permission-views
+  "Returns a predefined style map for permission views."
+  []
+  (generate-style-map [:table :thead :th :th-actions :td-primary :td-secondary :td-actions
+                       :link-primary :button-show :button-edit :button-delete :button-new
+                       :form-label :form-input :cancel-button :container]))
+
+(defn resource-views
+  "Returns a predefined style map for resource views."
+  []
+  (generate-style-map [:table :thead :th :th-actions :td-primary :td-secondary :td-actions
+                       :link-primary :button-show :button-edit :button-delete :button-new
+                       :form-label :form-input :cancel-button :container]))
